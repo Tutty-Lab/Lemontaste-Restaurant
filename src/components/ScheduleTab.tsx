@@ -423,6 +423,7 @@ export function ScheduleTab({
                   title={`${w.group === "KITCHEN" ? "Bếp" : "Bồi"} ít nhất có mặt, ${w.title}`}
                   labelClass={w.group === "KITCHEN" ? "text-orange-700" : "text-sky-700"}
                   dates={gridDates}
+                  need={w.need}
                   value={(d) => groupStats.get(d)?.windows.get(w.key) ?? null}
                 />
               ))}
@@ -559,21 +560,28 @@ const GROUP_RANGES = [
   ["evening-end", "20–21½", "20:00 – đóng cửa 21:30", 20 * 60, 21 * 60 + 30],
 ] as const;
 const GROUP_WINDOWS = (["KITCHEN", "SERVICE"] as const).flatMap((group) =>
-  GROUP_RANGES.map(([key, range, title, from, to]) => ({ key: `${group}-${key}`, range, title, group, from, to })),
+  GROUP_RANGES.map(([key, range, title, from, to]) => ({
+    key: `${group}-${key}`, range, title, group, from, to,
+    // Luật Lemontaste: Bếp suốt giờ mở, Bồi chỉ giờ đông – ngoài đó chỉ để xem, không cảnh báo.
+    need: group === "KITCHEN" || key === "noon" || key === "evening" ? 1 : 0,
+  })),
 );
 
-/** Dòng „ít nhất x người" của một nhóm trong khung giờ: 0 = đỏ, 1 = vàng. */
+/** Dòng „ít nhất x người" của một nhóm trong khung giờ: đỏ khi thiếu so với luật. */
 function GroupWindowRow({
   label,
   title,
   labelClass,
   dates,
+  need,
   value,
 }: {
   label: string;
   title: string;
   labelClass: string;
   dates: string[];
+  /** Số người luật yêu cầu; 0 = chỉ để xem, không tô màu. */
+  need: number;
   value: (d: string) => number | null;
 }) {
   return (
@@ -586,7 +594,7 @@ function GroupWindowRow({
       </td>
       {dates.map((d) => {
         const n = value(d);
-        const tone = n == null ? "text-slate-300" : n === 0 ? "bg-rose-50 text-rose-700 font-semibold" : n === 1 ? "bg-amber-50 text-amber-800" : "";
+        const tone = n == null ? "text-slate-300" : n < need ? "bg-rose-50 text-rose-700 font-semibold" : "";
         return (
           <td key={d} className={`border-t border-l border-slate-200 px-1 py-1 text-center ${tone}`}>
             {n ?? "–"}
