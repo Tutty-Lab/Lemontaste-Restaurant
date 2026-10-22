@@ -136,6 +136,7 @@ export function analyzeSchedule(input: AnalyzeInput): ScheduleAnalysis {
     const peaks: PeakCoverage[] = [];
     if (!day.closed) {
       for (const peak of staffingWindows(day.blocks, effectiveWeekdayKey(date, holidays), input.rules, holidays.has(date))) {
+        if (peak.quiet) continue; // reines Planungsziel, keine Warnung
         const from = peak.startMinutes;
         const to = peak.endMinutes;
         const who = peak.who;

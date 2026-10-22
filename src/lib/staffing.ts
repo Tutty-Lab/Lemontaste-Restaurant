@@ -10,6 +10,8 @@ export type StaffingWindow = {
   maxStaff: number;
   /** Nur diese Leute zählen (z. B. nur Bếp); fehlt = alle. */
   who?: (employee: Employee) => boolean;
+  weight?: number;
+  quiet?: boolean;
 };
 
 /** Ab hier läuft der Abend aus – bis dahin muss jemand im Laden bleiben. */
@@ -43,6 +45,10 @@ export type StaffingRule = {
   /** false = gilt nicht an Feiertagen (obwohl die wie Sonntag zählen). */
   onHolidays?: boolean;
   windows: (blocks: DayBlocks) => DayWindow[];
+  /** Kosten je fehlender Personenminute im Planer; fehlt = 500 (Gruppe 5000). */
+  weight?: number;
+  /** Nur Planungsziel (weich): keine Warnung, keine eigene Zeile im Raster. */
+  quiet?: boolean;
 };
 
 /** Schneidet eine feste Uhrzeitspanne mit jedem Öffnungsblock. */
@@ -98,7 +104,7 @@ export function staffingWindows(
 ): StaffingWindow[] {
   return rules.filter((rule) => ruleAppliesOn(rule, weekday) && !(holiday && rule.onHolidays === false)).flatMap((rule) => {
     const range = ruleRange(rule, weekday);
-    return rule.windows(blocks).map((window) => ({ label: rule.label, ...window, ...range, who: rule.who }));
+    return rule.windows(blocks).map((window) => ({ label: rule.label, ...window, ...range, who: rule.who, weight: rule.weight, quiet: rule.quiet }));
   });
 }
 

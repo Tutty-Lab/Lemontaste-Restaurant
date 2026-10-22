@@ -151,7 +151,7 @@ export function ScheduleTab({
     }
     return map;
   }, [store.analysis]);
-  const staffingRows = store.storeConfig.staffingRules;
+  const staffingRows = store.storeConfig.staffingRules.filter((rule) => !rule.quiet);
 
   // Debug wie AnAn: Bếp/Phục vụ je Tag und je Zeitfenster die kleinste Zahl
   // gleichzeitig Anwesender (Sushi zählt zur Küche, Bar/Quản lý zum Service).

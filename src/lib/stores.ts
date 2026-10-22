@@ -51,6 +51,14 @@ const rules: readonly StaffingRule[] = [
     scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: clip(720, 840) },
   { label: "Phục vụ tối", when: "18:00–20:00", minStaff: 1, maxStaff: Infinity,
     scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: clip(1080, 1200) },
+  // Luật mềm (chủ, 10/2026): dàn Bồi ra cho không trùng nhau, ưu tiên phủ 11–12 và
+  // 20–21:30. Không đủ giờ Bồi để phủ cả ngày, nên chỉ là mục tiêu, không cảnh báo.
+  { label: "Bồi mở/đóng", when: "11:00–12:00, 20:00–21:30", minStaff: 1, maxStaff: Infinity,
+    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", quiet: true, weight: 120,
+    windows: blocks => [...clip(660, 720)(blocks), ...clip(1200, 1290)(blocks)] },
+  { label: "Bồi rải đều", when: "11:00–21:30", minStaff: 1, maxStaff: Infinity,
+    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", quiet: true, weight: 40,
+    windows: blocks => blocks },
 ];
 export const STORES: StoreConfig[] = [
   { id: "lemontaste", name: "Lemontaste", shortName: "Lemontaste",

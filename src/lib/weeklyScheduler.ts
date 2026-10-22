@@ -212,7 +212,7 @@ function optionsFor(
 type DayModel = {
   minutes: number[];
   targets: number[];
-  windows: { slots: number[]; overlap: number[]; minStaff: number; maxStaff: number; who?: (employee: Employee) => boolean }[];
+  windows: { slots: number[]; overlap: number[]; minStaff: number; maxStaff: number; who?: (employee: Employee) => boolean; weight?: number }[];
 };
 const dayModelCache = new Map<string, DayModel>();
 function dayModel(blocks: DayBlocks, weekday: WeekdayKey, targetHours: number, ctx: Ctx, holiday: boolean): DayModel {
@@ -228,7 +228,7 @@ function dayModel(blocks: DayBlocks, weekday: WeekdayKey, targetHours: number, c
       const covered = Math.min(window.endMinutes, minute + SLOT) - Math.max(window.startMinutes, minute);
       if (covered > 0) { slots.push(index); overlap.push(covered); }
     });
-    return { slots, overlap, minStaff: window.minStaff, maxStaff: window.maxStaff, who: window.who };
+    return { slots, overlap, minStaff: window.minStaff, maxStaff: window.maxStaff, who: window.who, weight: window.weight };
   });
   const model = { minutes, targets: slotList.map(([, target]) => target), windows };
   if (dayModelCache.size > 5000) dayModelCache.clear();
@@ -260,7 +260,7 @@ function dayCost(shifts: Shift[], blocks: DayBlocks, weekday: WeekdayKey, target
       const staff = pool ? pool.filter((shift) => workingAt(shift, minute)).length : counts[window.slots[k]];
       // Gruppenregeln (z. B. „mindestens 1 Phục vụ") wiegen 10× – sonst opfert der
       // Planer eine halbe Stunde ohne Service, um die Tagesstunden zu treffen.
-      cost += (Math.max(0, window.minStaff - staff) + Math.max(0, staff - window.maxStaff)) * window.overlap[k] * (who ? 5000 : 500);
+      cost += (Math.max(0, window.minStaff - staff) + Math.max(0, staff - window.maxStaff)) * window.overlap[k] * (window.weight ?? (who ? 5000 : 500));
     }
   }
   for (let i = 0; i < counts.length; i++) cost += (counts[i] - model.targets[i]) ** 2 * SLOT_DEVIATION_COST;
