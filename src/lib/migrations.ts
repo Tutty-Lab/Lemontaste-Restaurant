@@ -10,6 +10,7 @@
 
 import type { Employee, Schedule } from "../types";
 import { demoEmployees, makeEmployee } from "./sampleData";
+import { LEMONTASTE_PATCHES } from "./restaurantData";
 
 /** Thu Vân Nguyễn: Vollzeit im Coco, ab September 2026 zusätzlich Minijob 43 h im Nieu. */
 export const MIGRATION_THU_VAN_NIEU = "2026-10-thu-van-nieu";
@@ -59,6 +60,13 @@ function thuVanNieu(storeId: string, employees: Employee[]): Employee[] {
  */
 export const MIGRATION_DEMO_SEED = "2026-10-demo-seed-10";
 
+/**
+ * Lemontaste – bảng nhân sự 10/2026: bỏ Duc Thanh Nguyen, đặt tên hai người mới
+ * (Thai Hung Nguyen, Tran Dinh Hoang), vị trí Bếp/Bar, ngày làm, Van Diep nghỉ
+ * cuối T10, Dinh Bien chỉ làm trong khung 18:00–21:30.
+ */
+export const MIGRATION_LEMONTASTE_STAFF_10 = "2026-10-lemontaste-staff";
+
 /** Wendet alle noch offenen Änderungen auf den Stand einer Filiale an. */
 export function applyMigrations(storeId: string, schedule: Schedule): Schedule {
   let next = schedule;
@@ -69,6 +77,15 @@ export function applyMigrations(storeId: string, schedule: Schedule): Schedule {
   if (!done().includes(MIGRATION_DEMO_SEED)) {
     const seed = storeId === "demo" && next.employees.length === 0;
     next = { ...next, employees: seed ? demoEmployees() : next.employees, migrations: [...done(), MIGRATION_DEMO_SEED] };
+  }
+  if (!done().includes(MIGRATION_LEMONTASTE_STAFF_10)) {
+    const employees = storeId === "lemontaste"
+      ? next.employees
+          .filter((e) => e.id !== "lt-duc-thanh")
+          .map((e) => (LEMONTASTE_PATCHES[e.id] ? { ...e, ...LEMONTASTE_PATCHES[e.id] } : e))
+      : next.employees;
+    const shifts = storeId === "lemontaste" ? next.shifts.filter((s) => s.employeeId !== "lt-duc-thanh") : next.shifts;
+    next = { ...next, employees, shifts, migrations: [...done(), MIGRATION_LEMONTASTE_STAFF_10] };
   }
   return next;
 }

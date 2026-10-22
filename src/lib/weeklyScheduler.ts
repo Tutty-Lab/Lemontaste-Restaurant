@@ -151,6 +151,15 @@ function startsInBlock(block: DayWindow, presence: number): number[] {
   return starts;
 }
 
+/** Öffnungsblöcke, auf das „Khung ca" der Person zugeschnitten. */
+function blocksFor(employee: Employee, blocks: DayBlocks): DayBlocks {
+  const w = employee.shiftWindow;
+  if (!w) return blocks;
+  return blocks
+    .map((b) => ({ startMinutes: Math.max(b.startMinutes, w.startMinutes), endMinutes: Math.min(b.endMinutes, w.endMinutes) }))
+    .filter((b) => b.endMinutes > b.startMinutes);
+}
+
 function optionsFor(
   employee: Employee,
   date: string,
@@ -161,6 +170,7 @@ function optionsFor(
   ctx: Ctx,
 ): Option[] {
   if (paid <= 0 || paid > MAX_PAID) return [];
+  blocks = blocksFor(employee, blocks);
   if (employee.fixedShift) {
     return fixedPaid(employee.fixedShift) === paid
       ? [{ shifts: [makeShift(employee.id, date, employee.fixedShift.startMinutes, paid, "EARLY", effectiveWeekday, ctx)], styleCost: 0 }]
@@ -484,7 +494,7 @@ function topUpShortfalls(
       for (const shift of own) {
         const day = days.get(shift.date);
         if (!day || day.closed) continue;
-        const block = day.blocks.find(
+        const block = blocksFor(employee, day.blocks).find(
           (candidate) => shift.startMinutes >= candidate.startMinutes && shift.endMinutes <= candidate.endMinutes,
         );
         if (!block) continue;

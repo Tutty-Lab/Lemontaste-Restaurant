@@ -59,6 +59,11 @@ export type Employee = {
    */
   fixedShift?: DayWindow;
   /**
+   * „Khung ca": diese Person arbeitet NUR innerhalb dieses Fensters, die Länge
+   * bleibt frei (Lemontaste: Dinh Bien nur 18:00–21:30, nie ab 17:00).
+   */
+  shiftWindow?: DayWindow;
+  /**
    * Erster Arbeitstag als ISO-Datum "yyyy-MM-dd" (Eintritt/Vertragsbeginn).
    *
    * Gesetzt => Tage VOR diesem Datum sind gesperrt (kein Dienst) UND zählen
