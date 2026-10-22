@@ -67,6 +67,9 @@ export const MIGRATION_DEMO_SEED = "2026-10-demo-seed-10";
  */
 export const MIGRATION_LEMONTASTE_STAFF_10 = "2026-10-lemontaste-staff";
 
+/** Dinh Bien: Khung giờ ưu tiên wieder entfernen (Khung ca reicht, sonst Fehlwarnung). */
+export const MIGRATION_LEMONTASTE_BIEN_PREF = "2026-10-lemontaste-bien-pref";
+
 /** Wendet alle noch offenen Änderungen auf den Stand einer Filiale an. */
 export function applyMigrations(storeId: string, schedule: Schedule): Schedule {
   let next = schedule;
@@ -86,6 +89,12 @@ export function applyMigrations(storeId: string, schedule: Schedule): Schedule {
       : next.employees;
     const shifts = storeId === "lemontaste" ? next.shifts.filter((s) => s.employeeId !== "lt-duc-thanh") : next.shifts;
     next = { ...next, employees, shifts, migrations: [...done(), MIGRATION_LEMONTASTE_STAFF_10] };
+  }
+  if (!done().includes(MIGRATION_LEMONTASTE_BIEN_PREF)) {
+    const employees = storeId === "lemontaste"
+      ? next.employees.map((e) => (e.id === "lt-dinh-bien" ? { ...e, preferredWindows: undefined } : e))
+      : next.employees;
+    next = { ...next, employees, migrations: [...done(), MIGRATION_LEMONTASTE_BIEN_PREF] };
   }
   return next;
 }

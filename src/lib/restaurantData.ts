@@ -24,7 +24,9 @@ export const LEMONTASTE_PATCHES: Record<string, Partial<Employee>> = {
   "lt-dinh-bien": {
     station: "SERVICE",
     shiftWindow: DINH_BIEN_SHIFT,
-    preferredWindows: [{ days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"], startMinutes: 18 * 60, endMinutes: 20 * 60 }],
+    // Kein „Khung giờ ưu tiên": jede Schicht im Fenster deckt 18:00–20:00 ohnehin ab,
+    // sonst meldet die Prüfung jede Schicht bis 21:30 als „ngoài khung".
+    preferredWindows: undefined,
   },
   "lt-moi-a": { name: "Thai Hung Nguyen", station: "SERVICE", availableWeekdays: ["friday", "saturday", "sunday"] }, // Bar, T6–CN
   "lt-moi-b": { name: "Tran Dinh Hoang", station: "KITCHEN", maxDaysPerWeek: 5 }, // Bếp, thử việc 8 tháng
