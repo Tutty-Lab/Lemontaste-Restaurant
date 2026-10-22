@@ -46,7 +46,7 @@ const rules: readonly StaffingRule[] = [
   // Chủ quán (10/2026): luôn có ít nhất 1 Bếp suốt giờ mở cửa.
   { label: "Bếp", when: "11:00–21:30", minStaff: 1, maxStaff: Infinity,
     scaled: false, who: (e: Employee) => e.station === "KITCHEN", windows: blocks => blocks },
-  // Giờ cao điểm phải có ít nhất 1 Phục vụ (không đủ giờ để có Phục vụ suốt ngày).
+  // Giờ cao điểm phải có ít nhất 1 Bồi (Phục vụ) (không đủ giờ để có Phục vụ suốt ngày).
   { label: "Phục vụ trưa", when: "12:00–14:00", minStaff: 1, maxStaff: Infinity,
     scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: clip(720, 840) },
   { label: "Phục vụ tối", when: "18:00–20:00", minStaff: 1, maxStaff: Infinity,

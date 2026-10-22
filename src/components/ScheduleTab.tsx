@@ -389,7 +389,7 @@ export function ScheduleTab({
               <SummaryRow label="Số nhân viên" dates={gridDates} value={(d) => String(dayStats.get(d)!.people.size)} />
               <SummaryRow label="Số ca" dates={gridDates} value={(d) => String(dayStats.get(d)!.shifts)} />
               <SummaryRow label="Bếp" labelClass="text-orange-700" dates={gridDates} value={(d) => String(groupStats.get(d)!.kitchen)} />
-              <SummaryRow label="Phục vụ" labelClass="text-sky-700" dates={gridDates} value={(d) => String(groupStats.get(d)!.service)} />
+              <SummaryRow label="Bồi" labelClass="text-sky-700" dates={gridDates} value={(d) => String(groupStats.get(d)!.service)} />
               <SummaryRow
                 label="Tổng giờ"
                 dates={gridDates}
@@ -419,8 +419,8 @@ export function ScheduleTab({
               {schedule.shifts.length > 0 && GROUP_WINDOWS.map((w) => (
                 <GroupWindowRow
                   key={w.key}
-                  label={`${w.group === "KITCHEN" ? "Bếp" : "PV"} ${w.range}`}
-                  title={`${w.group === "KITCHEN" ? "Bếp" : "Phục vụ"} ít nhất có mặt, ${w.title}`}
+                  label={`${w.group === "KITCHEN" ? "Bếp" : "Bồi"} ${w.range}`}
+                  title={`${w.group === "KITCHEN" ? "Bếp" : "Bồi"} ít nhất có mặt, ${w.title}`}
                   labelClass={w.group === "KITCHEN" ? "text-orange-700" : "text-sky-700"}
                   dates={gridDates}
                   value={(d) => groupStats.get(d)?.windows.get(w.key) ?? null}
@@ -454,7 +454,7 @@ function SummaryRow({
 }: {
   label: string;
   hint?: string;
-  /** Màu nhãn theo nhóm (Bếp cam, Phục vụ xanh). */
+  /** Màu nhãn theo nhóm (Bếp cam, Bồi xanh). */
   labelClass?: string;
   dates: string[];
   value: (d: string) => string;
@@ -479,11 +479,11 @@ function SummaryRow({
 /** Kurznamen der Besetzungsregeln für die schmale erste Spalte. */
 const SHORT_RULE_LABELS: Record<string, string> = {
   "Trong giờ mở cửa": "Giờ mở",
-  "Cao điểm trưa": "Đông 13–15",
-  "Cao điểm tối": "Đông 18–21",
-  "Phục vụ": "Có PV",
+  "Cao điểm trưa": "Đông 12–14",
+  "Cao điểm tối": "Đông 18–20",
+  "Phục vụ trưa": "Bồi 12–14",
+  "Phục vụ tối": "Bồi 18–20",
   "Bếp": "Có Bếp",
-  "Lái xe CN": "Xe CN 18–21",
 };
 
 /**
@@ -549,14 +549,14 @@ function CoverageRow({
   );
 }
 
-// Khung giờ cho các dòng „ít nhất" Bếp/Phục vụ – theo giờ Khang & Ngon
-// (12–15, 17:30–22; đông 13–15 và 18–21). Nhãn ngắn, đầy đủ ở tooltip.
+// Khung giờ cho các dòng „ít nhất" Bếp/Bồi – theo giờ Lemontaste
+// (11:00–21:30; đông 12–14 và 18–20). Nhãn ngắn, đầy đủ ở tooltip.
 const GROUP_RANGES = [
-  ["noon-open", "12–13", "12:00 – 13:00", 12 * 60, 13 * 60],
-  ["noon", "13–15", "13:00 – 15:00 (giờ đông)", 13 * 60, 15 * 60],
-  ["evening-open", "17½–18", "17:30 – 18:00", 17 * 60 + 30, 18 * 60],
-  ["evening", "18–21", "18:00 – 21:00 (giờ đông)", 18 * 60, 21 * 60],
-  ["evening-end", "21–22", "21:00 – đóng cửa 22:00", 21 * 60, 22 * 60],
+  ["open", "11–12", "11:00 – 12:00", 11 * 60, 12 * 60],
+  ["noon", "12–14", "12:00 – 14:00 (giờ đông)", 12 * 60, 14 * 60],
+  ["afternoon", "14–18", "14:00 – 18:00 (ít khách 15–17)", 14 * 60, 18 * 60],
+  ["evening", "18–20", "18:00 – 20:00 (giờ đông)", 18 * 60, 20 * 60],
+  ["evening-end", "20–21½", "20:00 – đóng cửa 21:30", 20 * 60, 21 * 60 + 30],
 ] as const;
 const GROUP_WINDOWS = (["KITCHEN", "SERVICE"] as const).flatMap((group) =>
   GROUP_RANGES.map(([key, range, title, from, to]) => ({ key: `${group}-${key}`, range, title, group, from, to })),
