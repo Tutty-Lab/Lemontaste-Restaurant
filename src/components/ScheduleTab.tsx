@@ -151,7 +151,7 @@ export function ScheduleTab({
     }
     return map;
   }, [store.analysis]);
-  const staffingRows = store.storeConfig.staffingRules.filter((rule) => !rule.quiet);
+  const staffingRows = store.storeConfig.staffingRules;
 
   // Debug wie AnAn: Bếp/Phục vụ je Tag und je Zeitfenster die kleinste Zahl
   // gleichzeitig Anwesender (Sushi zählt zur Küche, Bar/Quản lý zum Service).
@@ -551,7 +551,9 @@ function CoverageRow({
           <td
             key={d}
             className={`border-t border-l border-slate-200 px-1 py-1 text-center ${
-              short ? "bg-rose-50 font-semibold text-rose-700 outline outline-2 -outline-offset-2 outline-rose-500" : ""
+              !short ? ""
+                : hard ? "bg-rose-50 font-semibold text-rose-700 outline outline-2 -outline-offset-2 outline-rose-500"
+                : "bg-amber-50 font-semibold text-amber-800 outline outline-2 -outline-offset-2 outline-amber-500"
             }`}
             title={`ít nhất ${min}, đông nhất ${max} · luật: ${need}${Number.isFinite(allowed) ? `–${allowed}` : "+"} người`}
           >
@@ -583,7 +585,7 @@ const GROUP_WINDOWS = (["KITCHEN", "SERVICE"] as const).flatMap((group) =>
   })),
 );
 
-/** Dòng „ít nhất x người" của một nhóm trong khung giờ: đỏ khi thiếu so với luật. */
+/** Dòng „ít nhất x người" của một nhóm trong khung giờ: đỏ khi thiếu so với luật, vàng khi trống. */
 function GroupWindowRow({
   label,
   title,
@@ -610,7 +612,10 @@ function GroupWindowRow({
       </td>
       {dates.map((d) => {
         const n = value(d);
-        const tone = n == null ? "text-slate-300" : n < need ? "bg-rose-50 text-rose-700 font-semibold" : "";
+        // Đỏ = thiếu so với luật cứng; vàng = khung không bắt buộc nhưng trống người.
+        const tone = n == null ? "text-slate-300"
+          : n < need ? "bg-rose-50 text-rose-700 font-semibold"
+          : n === 0 ? "bg-amber-50 text-amber-800" : "";
         return (
           <td key={d} className={`border-t border-l border-slate-200 px-1 py-1 text-center ${tone}`}>
             {n ?? "–"}

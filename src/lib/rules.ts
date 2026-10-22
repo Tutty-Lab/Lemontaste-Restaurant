@@ -28,7 +28,8 @@ export type RuleId =
   | "day-weights"
   | "own-shift-length"
   | "spread-evenly"
-  | "preferred-windows";
+  | "preferred-windows"
+  | "spread-service";
 
 export type Rule = { id: RuleId; kind: RuleKind; title: string; detail: string };
 
@@ -48,6 +49,7 @@ export const RULES: readonly Rule[] = [
   { id: "day-weights", kind: "soft", title: "Ngày đông nhiều giờ hơn", detail: "Ngày đông (hệ số 1,5) và ngày lễ nhận nhiều giờ hơn ngày thường." },
   { id: "own-shift-length", kind: "soft", title: "Độ dài ca riêng", detail: "Mỗi ngày làm nằm trong khoảng giờ đã đặt cho người đó." },
   { id: "spread-evenly", kind: "soft", title: "Rải đều trong tháng", detail: "Giờ chia đều theo tuần; có Độ dài ca thì nhiều ca ngắn hơn." },
+  { id: "spread-service", kind: "soft", title: "Dàn Bồi suốt giờ mở", detail: "Bồi không làm trùng nhau, ưu tiên phủ 11–12 và 20–21:30. Không đủ giờ Bồi thì báo thiếu, lịch vẫn dùng được." },
   { id: "preferred-windows", kind: "soft", title: "Khung giờ ưu tiên", detail: "Xếp vào ngày và giờ người đó muốn, nếu số người và giờ định mức cho phép." },
 ];
 
@@ -55,5 +57,6 @@ export const ruleById = (id: RuleId): Rule => RULES.find((r) => r.id === id)!;
 
 /** Besetzungsregeln (staffing.ts) nach Label: welche hart, welche weich. */
 export function staffingRuleId(label: string): RuleId {
+  if (label === "Bồi mở/đóng" || label === "Bồi rải đều") return "spread-service";
   return label === "Trưa" || label === "Tối" ? "peak-staff" : "closing";
 }
