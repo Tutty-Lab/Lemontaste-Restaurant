@@ -21,6 +21,7 @@ import { monthlyTargetMinutesFor, SCHEDULE_SLOT_MINUTES } from "../lib/contract"
 import { StaffingReport } from "./StaffingReport";
 import type { PeakCoverage } from "../lib/analyze";
 import { ruleById, staffingRuleId } from "../lib/rules";
+import { checkShifts } from "../lib/shiftChecks";
 
 /** „17", „11½" (halbe Stunde), sonst „11:15" – so bleibt die Zelle schmal. */
 function shortTime(minutes: number): string {
@@ -100,6 +101,9 @@ export function ScheduleTab({
     () => new Map(validation.summaries.map((s) => [s.employee.id, s] as const)),
     [validation.summaries],
   );
+
+  // Jede Schicht gegen die Regeln geprüft – Treffer werden im Raster umrandet.
+  const issuesByCell = useMemo(() => checkShifts(schedule), [schedule]);
 
   const overridesByDate = useMemo(
     () => new Map(schedule.dateOverrides.map((o) => [o.date, o] as const)),
@@ -274,6 +278,12 @@ export function ScheduleTab({
           <span className="inline-flex items-center gap-1">
             <span className="inline-block h-3 w-3 rounded border shift-custom bg-white" /> Đã sửa tay
           </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block h-3 w-3 rounded outline outline-2 outline-rose-600" /> Sai luật
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block h-3 w-3 rounded outline outline-2 outline-amber-500" /> Lệch luật mềm
+          </span>
         </div>
       )}
 
@@ -347,14 +357,20 @@ export function ScheduleTab({
                     {gridDates.map((d) => {
                       const dienste = shiftMap.get(`${emp.id}#${d}`) ?? [];
                       const shift = dienste[0];
+                      const issues = issuesByCell.get(`${emp.id}#${d}`) ?? [];
+                      const hard = issues.some((i) => i.hard);
+                      const ring = issues.length === 0 ? ""
+                        : hard ? "outline outline-2 -outline-offset-2 outline-rose-600"
+                        : "outline outline-2 -outline-offset-2 outline-amber-500";
                       return (
                         <td
                           key={d}
                           onClick={() => setSelected({ employeeId: emp.id, date: d })}
                           className={`border-b border-l border-slate-200 px-0.5 py-1 text-center cursor-pointer align-middle ${cellClass(
                             shift,
-                          )}`}
-                          title="Bấm để sửa"
+                          )} ${ring}`}
+                          title={issues.length ? `${issues.map((i) => `${i.hard ? "✖" : "⚠"} ${i.text}`).join("\n")}\nBấm để sửa` : "Bấm để sửa"}
+                          data-issues={issues.length ? issues.map((i) => i.text).join(" | ") : undefined}
                         >
                           {shift ? (
                             // Kurz: „11:30–15" / „17–22" je Dienst untereinander.
