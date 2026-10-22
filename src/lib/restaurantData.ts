@@ -16,10 +16,10 @@ export const DINH_BIEN_SHIFT = { startMinutes: 18 * 60, endMinutes: 21 * 60 + 30
 
 /** Vị trí, ngày làm và ghi chú theo bảng nhân sự 10/2026 của chủ quán. */
 export const LEMONTASTE_PATCHES: Record<string, Partial<Employee>> = {
-  "lt-ngoc-long": { station: "KITCHEN" }, // Bếp, chuẩn bị đồ
-  "lt-ngoc-ly-ly": { station: "KITCHEN" }, // Bếp, nước, sơ chế
+  "lt-ngoc-long": { station: "KITCHEN" }, // Giấy chủ: nấu, bồi, Vorbereitung… – tính Bếp
+  "lt-ngoc-ly-ly": { station: "SERVICE" }, // Giấy chủ: Bồi, Mise, chuẩn bị giấy tờ
   "lt-van-diep": { station: "KITCHEN", endDate: "2026-10-31" }, // Bếp, nghỉ cuối T10
-  "lt-thi-huong": { station: "KITCHEN", availableWeekdays: ["saturday", "sunday"] }, // Bếp/Bar, cuối tuần
+  "lt-thi-huong": { station: "SERVICE", availableWeekdays: ["friday", "saturday", "sunday"] }, // Bồi/Bar, T6–CN
   "lt-van-kien": { station: "KITCHEN" }, // Bếp phụ
   "lt-dinh-bien": {
     station: "SERVICE",

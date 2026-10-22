@@ -70,6 +70,9 @@ export const MIGRATION_LEMONTASTE_STAFF_10 = "2026-10-lemontaste-staff";
 /** Dinh Bien: Khung giờ ưu tiên wieder entfernen (Khung ca reicht, sonst Fehlwarnung). */
 export const MIGRATION_LEMONTASTE_BIEN_PREF = "2026-10-lemontaste-bien-pref";
 
+/** Ly Ly + Thi Huong sind laut Zettel des Chefs Bồi (Phục vụ); Thi Huong Fr–So. */
+export const MIGRATION_LEMONTASTE_SERVICE = "2026-10-lemontaste-service";
+
 /** Wendet alle noch offenen Änderungen auf den Stand einer Filiale an. */
 export function applyMigrations(storeId: string, schedule: Schedule): Schedule {
   let next = schedule;
@@ -95,6 +98,13 @@ export function applyMigrations(storeId: string, schedule: Schedule): Schedule {
       ? next.employees.map((e) => (e.id === "lt-dinh-bien" ? { ...e, preferredWindows: undefined } : e))
       : next.employees;
     next = { ...next, employees, migrations: [...done(), MIGRATION_LEMONTASTE_BIEN_PREF] };
+  }
+  if (!done().includes(MIGRATION_LEMONTASTE_SERVICE)) {
+    const fix = ["lt-ngoc-ly-ly", "lt-thi-huong"];
+    const employees = storeId === "lemontaste"
+      ? next.employees.map((e) => (fix.includes(e.id) ? { ...e, ...LEMONTASTE_PATCHES[e.id] } : e))
+      : next.employees;
+    next = { ...next, employees, migrations: [...done(), MIGRATION_LEMONTASTE_SERVICE] };
   }
   return next;
 }
