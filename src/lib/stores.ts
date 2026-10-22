@@ -43,6 +43,9 @@ const rules: readonly StaffingRule[] = [
     scaled: false, windows: clip(720, 840) },
   { label: "Cao điểm tối", when: "18:00–20:00", minStaff: 2, maxStaff: Infinity,
     scaled: false, windows: clip(1080, 1200) },
+  // Chủ quán (10/2026): luôn có ít nhất 1 Bếp suốt giờ mở cửa.
+  { label: "Bếp", when: "11:00–21:30", minStaff: 1, maxStaff: Infinity,
+    scaled: false, who: (e: Employee) => e.station === "KITCHEN", windows: blocks => blocks },
 ];
 export const STORES: StoreConfig[] = [
   { id: "lemontaste", name: "Lemontaste", shortName: "Lemontaste",
