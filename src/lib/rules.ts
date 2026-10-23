@@ -36,7 +36,7 @@ export type Rule = { id: RuleId; kind: RuleKind; title: string; detail: string }
 export const RULES: readonly Rule[] = [
   { id: "open-hours", kind: "hard", title: "Chỉ trong giờ mở cửa", detail: "Ngày quán đóng cửa và giờ nghỉ trưa không xếp ca." },
   { id: "closing", kind: "hard", title: "Đủ người theo khung vận hành", detail: "Bếp suốt giờ mở; Bồi chuẩn bị 11–12, 17–18 và cao điểm 12–14, 18–20. Khung bắt buộc thiếu người phải báo đỏ." },
-  { id: "shift-length", kind: "hard", title: "Ca 3–8 giờ, nghỉ đúng luật", detail: "Mỗi ca ít nhất 3 giờ, tối đa 8 giờ công một ngày; giờ nghỉ theo luật lao động." },
+  { id: "shift-length", kind: "hard", title: "Ca liền, nghỉ đúng luật", detail: "Lemontaste cho phép ca từ 1 giờ để phủ khung thiếu; tối đa 8 giờ công/ngày. Không chia ca gãy; giờ giải lao không tính nhân sự." },
   { id: "max-days", kind: "hard", title: "Tối đa 6 ngày liên tiếp", detail: "Không vượt 6 ngày liên tiếp và không vượt „Số ngày làm / tuần\" đã đặt." },
   { id: "days-off", kind: "hard", title: "Ngày nghỉ cố định", detail: "Không xếp ca vào ngày nghỉ cố định của người đó." },
   { id: "employment-period", kind: "hard", title: "Ngày vào làm / nghỉ việc", detail: "Không xếp ca trước ngày vào làm hoặc sau ngày nghỉ việc." },
@@ -45,11 +45,11 @@ export const RULES: readonly Rule[] = [
   { id: "fixed-shift", kind: "hard", title: "Ca cố định", detail: "Người có ca cố định chỉ làm đúng khung giờ đó." },
   { id: "holiday-duty", kind: "hard", title: "Trực ngày lễ", detail: "Ngày lễ quán mở thì người trực ngày lễ phải có ca." },
   { id: "contract-hours", kind: "soft", title: "Đủ giờ định mức", detail: "Xếp đủ giờ hợp đồng; tháng không đủ ngày (nghỉ, giới hạn ngày, làm quán khác) thì báo thiếu." },
-  { id: "peak-staff", kind: "soft", title: "Số người giờ cao điểm", detail: "Trưa 12–14h và tối 18–21h đủ người (đông hơn thì không sao)." },
+  { id: "peak-staff", kind: "soft", title: "Số người giờ cao điểm", detail: "Trưa 12–14h và tối 18–20h; giờ dư ưu tiên các khung này và thứ 7, CN. Trước hết phủ ít nhất 1 Bồi + 1 Bếp suốt giờ mở." },
   { id: "day-weights", kind: "soft", title: "Ngày đông nhiều giờ hơn", detail: "Ngày đông (hệ số 1,5) và ngày lễ nhận nhiều giờ hơn ngày thường." },
   { id: "own-shift-length", kind: "soft", title: "Độ dài ca riêng", detail: "Mỗi ngày làm nằm trong khoảng giờ đã đặt cho người đó." },
-  { id: "spread-evenly", kind: "soft", title: "Rải đều trong tháng", detail: "Giờ chia đều theo tuần; có Độ dài ca thì nhiều ca ngắn hơn." },
-  { id: "spread-service", kind: "soft", title: "Dàn Bồi suốt giờ mở", detail: "Bồi không làm trùng nhau, ưu tiên phủ 11–12 và 20–21:30. Không đủ giờ Bồi thì báo thiếu, lịch vẫn dùng được." },
+  { id: "spread-evenly", kind: "soft", title: "Rải đều trong tháng", detail: "Hợp đồng tháng phân bổ trên toàn tháng, không khóa vào ngân sách từng tuần. Độ dài ca mong muốn là ưu tiên mềm." },
+  { id: "spread-service", kind: "soft", title: "Phủ Bồi suốt giờ mở", detail: "Ít nhất 1 Bồi trong mỗi khung giờ mở cửa. Khoảng trống phải hiển thị; người Cả 2 không được tính đồng thời làm Bồi và Bếp." },
   { id: "preferred-windows", kind: "soft", title: "Khung giờ ưu tiên", detail: "Xếp vào ngày và giờ người đó muốn, nếu số người và giờ định mức cho phép." },
 ];
 

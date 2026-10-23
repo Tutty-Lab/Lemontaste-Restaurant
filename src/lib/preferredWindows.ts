@@ -11,7 +11,7 @@ import { minutesToTime } from "./time";
 const DAY_ORDER: WeekdayKey[] = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
 /** Kürzeste und längste bezahlte Zeit je Tag, die der Planer überhaupt kennt. */
-const MIN_DAY = 180;
+const MIN_DAY = 60;
 const MAX_DAY = 480;
 
 /** Nur gültige Fenster (mind. ein Tag, Ende nach Beginn). */
@@ -37,7 +37,7 @@ export function minutesOutsidePreferred(windows: readonly PreferredWindow[], wee
 
 /**
  * „Độ dài ca" in Minuten, auf das 30-Minuten-Raster und die Grenzen des
- * Betriebs (3–8 h je Tag) gebracht. null = nicht gesetzt.
+ * Betriebs (1–8 h je Tag) gebracht. null = nicht gesetzt.
  */
 export function ownShiftRangeMinutes(employee: Employee): { min: number; max: number } | null {
   const r = employee.shiftHours;

@@ -27,8 +27,6 @@ import { initialScheduleFor, storeById, withSharedPersonDefaults, type StoreConf
 import { applyMigrations } from "../lib/migrations";
 import { archiveFromLegacySavedPlans, listSavedMonths, mergeArchives, switchMonth } from "../lib/monthArchive";
 import { isEmployedOn } from "../lib/availability";
-import { contractOpenDays } from "../lib/contract";
-import { weekStartOf } from "../lib/weeks";
 
 /**
  * Steht in diesem Stand überhaupt etwas? Maßstab sind Mitarbeiter und
@@ -220,11 +218,8 @@ export function useSchedule(storeId: string) {
     [schedule.employees, openDates],
   );
 
-  const openDays = useMemo(() => {
-    const byWeek = new Map<string, number>();
-    for (const date of openDates) byWeek.set(weekStartOf(date), (byWeek.get(weekStartOf(date)) ?? 0) + 1);
-    return contractOpenDays([...byWeek.values()]);
-  }, [openDates]);
+  // Opening days are calendar dates, not the six-day denominator of a contract.
+  const openDays = openDates.length;
 
   const validation: ValidationResult = useMemo(
     () => validateSchedule(schedule.employees, schedule.shifts, schedule.year, openDates, schedule.workHours),

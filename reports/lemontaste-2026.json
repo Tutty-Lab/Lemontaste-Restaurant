@@ -1,0 +1,2788 @@
+[
+  {
+    "month": 1,
+    "seconds": 6.680649399999999,
+    "report": {
+      "openMinutes": 19530,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 150,
+      "kitchenGap": 0,
+      "gaps": [
+        {
+          "date": "2026-01-06",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-01-08",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-01-12",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-01-19",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-01-26",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5310,
+          "kitchen": 1890
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 6720,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5880,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 6720,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 11520,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 2,
+    "seconds": 6.5008995999999994,
+    "report": {
+      "openMinutes": 17640,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 90,
+      "kitchenGap": 0,
+      "gaps": [
+        {
+          "date": "2026-02-11",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-02-18",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-02-25",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 12000,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5640,
+          "kitchen": 1560
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 12000,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 12000,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 12000,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5250,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 10080,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 3,
+    "seconds": 6.689714,
+    "report": {
+      "openMinutes": 19530,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 30,
+      "kitchenGap": 0,
+      "gaps": [
+        {
+          "date": "2026-03-26",
+          "start": 990,
+          "end": 1020,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5700,
+          "kitchen": 1500
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 6240,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5670,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 6240,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 11040,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 4,
+    "seconds": 6.685186099999999,
+    "report": {
+      "openMinutes": 18900,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 150,
+      "kitchenGap": 0,
+      "gaps": [
+        {
+          "date": "2026-04-08",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-04-13",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-04-20",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-04-21",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-04-27",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5160,
+          "kitchen": 2040
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5670,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 11520,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 5,
+    "seconds": 6.9351189999999985,
+    "report": {
+      "openMinutes": 19530,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 90,
+      "kitchenGap": 0,
+      "gaps": [
+        {
+          "date": "2026-05-14",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-05-21",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-05-27",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5760,
+          "kitchen": 1440
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 7200,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5670,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 7200,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 11040,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 6,
+    "seconds": 7.972270700000001,
+    "report": {
+      "openMinutes": 18900,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 180,
+      "kitchenGap": 0,
+      "gaps": [
+        {
+          "date": "2026-06-03",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-06-09",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-06-15",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-06-22",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-06-25",
+          "start": 990,
+          "end": 1020,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-06-29",
+          "start": 990,
+          "end": 1020,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 12480,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5340,
+          "kitchen": 1860
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 12480,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 12480,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 12480,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5460,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 10560,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 7,
+    "seconds": 6.9039825999999955,
+    "report": {
+      "openMinutes": 19530,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 60,
+      "kitchenGap": 0,
+      "gaps": [
+        {
+          "date": "2026-07-09",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-07-20",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5430,
+          "kitchen": 1770
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 6240,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5880,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 6240,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 12000,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 8,
+    "seconds": 6.974417900000001,
+    "report": {
+      "openMinutes": 19530,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 90,
+      "kitchenGap": 0,
+      "gaps": [
+        {
+          "date": "2026-08-03",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-08-19",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-08-31",
+          "start": 660,
+          "end": 690,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5940,
+          "kitchen": 1260
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 6720,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5670,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 6720,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 11040,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 9,
+    "seconds": 6.6141320999999955,
+    "report": {
+      "openMinutes": 18900,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 240,
+      "kitchenGap": 0,
+      "gaps": [
+        {
+          "date": "2026-09-08",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-09-09",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-09-14",
+          "start": 870,
+          "end": 900,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-09-15",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-09-21",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-09-22",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-09-28",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-09-29",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5880,
+          "kitchen": 1320
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 12960,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5670,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 11040,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 10,
+    "seconds": 7.1941319000000075,
+    "report": {
+      "openMinutes": 19530,
+      "budget": 43380,
+      "minimumExtra": 0,
+      "serviceGap": 0,
+      "kitchenGap": 0,
+      "gaps": [],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 5910,
+          "kitchen": 1290
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 5580,
+          "assigned": 5580,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 5580
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 6720,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5880,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 6720,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 11520,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Đã phủ ít nhất 1 Bồi và 1 Bếp suốt giờ mở cửa."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 11,
+    "seconds": 5.6206261999999985,
+    "report": {
+      "openMinutes": 18900,
+      "budget": 37800,
+      "minimumExtra": 0,
+      "serviceGap": 780,
+      "kitchenGap": 360,
+      "gaps": [
+        {
+          "date": "2026-11-02",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-03",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-03",
+          "start": 930,
+          "end": 960,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-04",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-05",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-06",
+          "start": 870,
+          "end": 900,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-09",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-10",
+          "start": 930,
+          "end": 960,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-10",
+          "start": 990,
+          "end": 1020,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-11",
+          "start": 1230,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-12",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-13",
+          "start": 960,
+          "end": 990,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-14",
+          "start": 900,
+          "end": 930,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-14",
+          "start": 990,
+          "end": 1020,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Dinh Bien Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-16",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-17",
+          "start": 660,
+          "end": 690,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-17",
+          "start": 930,
+          "end": 960,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-17",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-18",
+          "start": 660,
+          "end": 720,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-18",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-18",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-18",
+          "start": 1230,
+          "end": 1290,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-19",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-20",
+          "start": 990,
+          "end": 1020,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Dinh Bien Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-23",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-24",
+          "start": 660,
+          "end": 690,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-24",
+          "start": 900,
+          "end": 930,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-24",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-25",
+          "start": 960,
+          "end": 1080,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-26",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-11-26",
+          "start": 930,
+          "end": 960,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-11-30",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 12480,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 2640,
+          "kitchen": 4560
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 12480,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 0,
+          "assigned": 0,
+          "capacity": 0,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 6240,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 12480,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5460,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 6240,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 10560,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ."
+      ],
+      "adjustments": []
+    }
+  },
+  {
+    "month": 12,
+    "seconds": 5.180843500000003,
+    "report": {
+      "openMinutes": 19530,
+      "budget": 37800,
+      "minimumExtra": 1260,
+      "serviceGap": 1290,
+      "kitchenGap": 390,
+      "gaps": [
+        {
+          "date": "2026-12-01",
+          "start": 870,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-02",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-02",
+          "start": 1260,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-03",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-03",
+          "start": 1230,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-07",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-07",
+          "start": 1260,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-08",
+          "start": 660,
+          "end": 690,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-08",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-09",
+          "start": 990,
+          "end": 1020,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-09",
+          "start": 1260,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-10",
+          "start": 660,
+          "end": 720,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-10",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-11",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Dinh Bien Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-12",
+          "start": 930,
+          "end": 960,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-14",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-14",
+          "start": 930,
+          "end": 960,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-15",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-15",
+          "start": 1230,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-16",
+          "start": 660,
+          "end": 720,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-16",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-17",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-17",
+          "start": 930,
+          "end": 960,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-18",
+          "start": 900,
+          "end": 930,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-18",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Dinh Bien Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-19",
+          "start": 930,
+          "end": 960,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-20",
+          "start": 660,
+          "end": 690,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-21",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-21",
+          "start": 1260,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-22",
+          "start": 990,
+          "end": 1020,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-22",
+          "start": 1260,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-23",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-23",
+          "start": 1260,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-24",
+          "start": 960,
+          "end": 990,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-24",
+          "start": 1260,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-25",
+          "start": 900,
+          "end": 930,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-25",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Dinh Bien Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-28",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-28",
+          "start": 1260,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-29",
+          "start": 660,
+          "end": 690,
+          "station": "KITCHEN",
+          "blockedNames": [
+            "Van Diep Mai"
+          ]
+        },
+        {
+          "date": "2026-12-29",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-29",
+          "start": 930,
+          "end": 960,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-30",
+          "start": 900,
+          "end": 930,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-30",
+          "start": 1230,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-31",
+          "start": 660,
+          "end": 690,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Dinh Bien Nguyen",
+            "Thai Hung Nguyen"
+          ]
+        },
+        {
+          "date": "2026-12-31",
+          "start": 1200,
+          "end": 1290,
+          "station": "SERVICE",
+          "blockedNames": [
+            "Thi Huong Bui",
+            "Thai Hung Nguyen"
+          ]
+        }
+      ],
+      "employees": [
+        {
+          "id": "lt-ngoc-long",
+          "name": "Ngoc Long Nguyen",
+          "role": "Cả 2",
+          "target": 7200,
+          "assigned": 7200,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 2160,
+          "kitchen": 5040
+        },
+        {
+          "id": "lt-ngoc-ly-ly",
+          "name": "Ngoc Ly Ly Nguyen",
+          "role": "Bồi",
+          "target": 10440,
+          "assigned": 10440,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 10440,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-diep",
+          "name": "Van Diep Mai",
+          "role": "Bếp",
+          "target": 0,
+          "assigned": 0,
+          "capacity": 0,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "nghỉ việc sau 2026-10-31; cần người thay thế từ ngày tiếp theo"
+          ],
+          "service": 0,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-thi-huong",
+          "name": "Thi Huong Bui",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-van-kien",
+          "name": "Van Kien Nguyen",
+          "role": "Bếp",
+          "target": 5160,
+          "assigned": 5160,
+          "capacity": 13440,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [],
+          "service": 0,
+          "kitchen": 5160
+        },
+        {
+          "id": "lt-dinh-bien",
+          "name": "Dinh Bien Nguyen",
+          "role": "Bồi",
+          "target": 2580,
+          "assigned": 2580,
+          "capacity": 5880,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "khung ca bị giới hạn; cân nhắc mở rộng giờ được làm"
+          ],
+          "service": 2580,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-a",
+          "name": "Thai Hung Nguyen",
+          "role": "Bồi",
+          "target": 840,
+          "assigned": 840,
+          "capacity": 5760,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "chỉ T6, T7, CN; có thể mở thêm T2, T3, T4, T5"
+          ],
+          "service": 840,
+          "kitchen": 0
+        },
+        {
+          "id": "lt-moi-b",
+          "name": "Tran Dinh Hoang",
+          "role": "Bếp",
+          "target": 9000,
+          "assigned": 9000,
+          "capacity": 11520,
+          "unassigned": 0,
+          "impossibleQuota": 0,
+          "restrictions": [
+            "tối đa 5 ngày/tuần; cân nhắc thêm ngày"
+          ],
+          "service": 0,
+          "kitchen": 9000
+        }
+      ],
+      "conclusions": [
+        "Thiếu ngân sách ít nhất 21h để có 1 Bồi + 1 Bếp suốt giờ mở. Đây là cận dưới, còn giới hạn ngày và ca."
+      ],
+      "adjustments": [
+        "Ngoc Long Nguyen (Cả 2): phương án tăng 21h, từ 120h lên 141h. Đây là lựa chọn thay thế, phải tạo lại để kiểm chứng độ phủ.",
+        "Van Kien Nguyen (Bếp): phương án tăng 21h, từ 86h lên 107h. Đây là lựa chọn thay thế, phải tạo lại để kiểm chứng độ phủ.",
+        "Thai Hung Nguyen (Bồi): phương án tăng 21h, từ 14h lên 35h. Đây là lựa chọn thay thế, phải tạo lại để kiểm chứng độ phủ."
+      ]
+    }
+  }
+]

@@ -159,14 +159,15 @@ export function ScheduleTab({
   const groupStats = useMemo(() => {
     const holidays = publicHolidays(schedule.year);
     const ovMap = Object.fromEntries(schedule.dateOverrides.map((o) => [o.date, o]));
-    const groupById = new Map(schedule.employees.map((e) => [e.id, e.station === "KITCHEN" ? "KITCHEN" : "SERVICE"] as const));
-    const result = new Map<string, { kitchen: number; service: number; windows: Map<string, number | null> }>();
+    const groupById = new Map(schedule.employees.map((e) => [e.id, e.station ?? "SERVICE"] as const));
+    const result = new Map<string, { kitchen: number; service: number; flexible: number; windows: Map<string, number | null> }>();
     for (const d of dates) {
       const dayShifts = schedule.shifts.filter((s) => s.date === d);
       const kitchen = new Set(dayShifts.filter((s) => groupById.get(s.employeeId) === "KITCHEN").map((s) => s.employeeId));
       const service = new Set(dayShifts.filter((s) => groupById.get(s.employeeId) === "SERVICE").map((s) => s.employeeId));
+      const flexible = new Set(dayShifts.filter((s) => groupById.get(s.employeeId) === "BOTH").map((s) => s.employeeId));
       const windows = new Map<string, number | null>();
-      result.set(d, { kitchen: kitchen.size, service: service.size, windows });
+      result.set(d, { kitchen: kitchen.size, service: service.size, flexible: flexible.size, windows });
       const day = resolveDay(schedule.workHours, d, holidays, ovMap);
       if (day.closed) continue;
       for (const w of GROUP_WINDOWS) {
@@ -406,8 +407,9 @@ export function ScheduleTab({
             <tfoot>
               <SummaryRow label="Số nhân viên" dates={gridDates} value={(d) => String(dayStats.get(d)!.people.size)} />
               <SummaryRow label="Số ca" dates={gridDates} value={(d) => String(dayStats.get(d)!.shifts)} />
-              <SummaryRow label="Bếp" labelClass="text-orange-700" dates={gridDates} value={(d) => String(groupStats.get(d)!.kitchen)} />
-              <SummaryRow label="Bồi" labelClass="text-sky-700" dates={gridDates} value={(d) => String(groupStats.get(d)!.service)} />
+              <SummaryRow label="Bếp riêng" labelClass="text-orange-700" dates={gridDates} value={(d) => String(groupStats.get(d)!.kitchen)} />
+              <SummaryRow label="Bồi riêng" labelClass="text-sky-700" dates={gridDates} value={(d) => String(groupStats.get(d)!.service)} />
+              <SummaryRow label="Cả 2" labelClass="text-violet-700" dates={gridDates} value={(d) => String(groupStats.get(d)!.flexible)} />
               <SummaryRow
                 label="Tổng giờ"
                 dates={gridDates}

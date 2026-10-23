@@ -13,7 +13,7 @@ import type { DateOverride, DayWindow, WorkHoursConfig } from "./lib/workHours";
  */
 export type EmploymentType = "VOLLZEIT" | "TEILZEIT" | "MINIJOB";
 
-/** Bộ phận: Bồi (Service) oder Bếp (Küche). Nur Anzeige – der Planer nutzt es (noch) nicht. */
+/** Một người chỉ đảm nhiệm một bộ phận tại mỗi thời điểm. */
 export type Station = "SERVICE" | "KITCHEN" | "BOTH";
 
 export type ShiftType = "EARLY" | "LATE" | "CUSTOM";
@@ -41,6 +41,7 @@ export type Employee = {
    */
   targetMinutes: number;
   monthlySalary?: number;
+  quotaSource?: "hours" | "salary";
   hourlyRate?: number;
   role?: string;
   referenceDays?: number;

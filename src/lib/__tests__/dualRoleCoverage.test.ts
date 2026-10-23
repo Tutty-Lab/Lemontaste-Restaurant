@@ -34,7 +34,7 @@ it("uses flexible staff and monthly capacity to reduce actual service gaps", () 
  expect(new Set(weekends.map(day => day.targetHours)).size).toBe(1);
  const weekendHours = weekends.map(day => day.paidHours);
  expect(Math.max(...weekendHours) - Math.min(...weekendHours)).toBeLessThanOrEqual(1);
- expect(report.emptyMinutes).toBeLessThanOrEqual(2.5 * 60);
+ expect(report.emptyMinutes).toBe(0);
  expect(validateSchedule(base.employees, shifts, 2026).errors.filter(e => e.severity !== "warning")).toEqual([]);
  expect(shifts.reduce((sum,s) => sum+s.paidMinutes,0)).toBe(base.employees.reduce((sum,e) => sum+Math.floor(e.targetMinutes/30)*30,0));
 },120000);

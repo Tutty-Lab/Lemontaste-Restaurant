@@ -28,8 +28,8 @@ const paidByDay = (shifts: Shift[]) => {
 const total = (shifts: Shift[]) => shifts.reduce((sum, s) => sum + s.paidMinutes, 0);
 
 describe("Độ dài ca", () => {
-  it("rundet auf das Raster und die Grenzen 3–8 h", () => {
-    expect(ownShiftRangeMinutes({ ...shin.sampleEmployees()[0], shiftHours: { min: 2, max: 3.2 } })).toEqual({ min: 180, max: 180 });
+  it("rundet auf das Raster und die Grenzen 1–8 h", () => {
+    expect(ownShiftRangeMinutes({ ...shin.sampleEmployees()[0], shiftHours: { min: 2, max: 3.2 } })).toEqual({ min: 120, max: 180 });
     expect(ownShiftRangeMinutes({ ...shin.sampleEmployees()[0], shiftHours: { min: 5, max: 10 } })).toEqual({ min: 300, max: 480 });
     expect(ownShiftRangeMinutes(shin.sampleEmployees()[0])).toBeNull();
   });

@@ -1,8 +1,7 @@
-import { DEFAULT_HOURLY_RATE, salaryToMinutes } from "../lib/payroll";
+import { DEFAULT_HOURLY_RATE } from "../lib/payroll";
 import { useMemo, useState } from "react";
 import type { UseScheduleReturn } from "../hooks/useSchedule";
 import type { Employee, EmploymentType, Station } from "../types";
-import { splitTargetHours } from "../lib/splitTargetHours";
 import { WEEKDAY_SHORT_VI, type WeekdayKey } from "../lib/demand";
 import { monthlyTargetMinutesFor } from "../lib/contract";
 import { employmentShortVi } from "../lib/employment";
@@ -15,13 +14,6 @@ import { describePreferredWindow, ownShiftRangeMinutes, preferredWindowsOf } fro
 const inputClass =
   "rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500";
 
-/** Voreinstellung der festen Schicht, wenn eingeschaltet: 6:30–14:30. */
-/**
- * Erweiterte Einstellungen (Ngày nghỉ, Luật riêng, Luật cứng, …) im Formular
- * bearbeitbar? In der Kunden-Demo aus: sichtbar, aber ausgegraut mit Hinweis.
- * Später einfach auf true setzen.
- */
-const ADVANCED_EDITABLE = true;
 const STATION_VI: Record<Station, string> = { SERVICE: "Bồi", KITCHEN: "Bếp", BOTH: "Cả 2 (Bồi + Bếp)" };
 
 const FIXED_START_DEFAULT = "06:30";
@@ -37,17 +29,6 @@ const WEEKDAY_ORDER: WeekdayKey[] = [
   "sunday",
 ];
 
-/** Số ngày làm (= số ca) cho một mục tiêu, hoặc thông báo lỗi. */
-function splitInfo(targetHours: number, type: EmploymentType): { ok: boolean; text: string } {
-  if (targetHours <= 0) return { ok: true, text: "—" };
-  try {
-    const parts = splitTargetHours(Math.round(targetHours), type);
-    return { ok: true, text: `${parts.length} ca` };
-  } catch (e) {
-    return { ok: false, text: e instanceof Error ? e.message : "không hợp lệ" };
-  }
-}
-
 /**
  * Entwurf, während im Blatt getippt wird. Zahlen sind STRINGS, damit man ein
  * Feld leeren kann, ohne dass es auf 0 zurückspringt. Aufbau wie in der
@@ -57,9 +38,7 @@ type Draft = {
   name: string;
   employmentType: EmploymentType;
   station: Station;
-  /** Wird der Vertrag je Woche oder je Monat geführt? */
-  unit: "week" | "month";
-  /** Stunden zur gewählten Einheit, als Text – „40,2" mit Komma ist erlaubt. */
+  /** Monthly hours as editable text; decimal commas are allowed. */
   hours: string;
   monthlySalary: string;
   hourlyRate: string;
@@ -71,6 +50,9 @@ type Draft = {
   fixed: boolean;
   fixedStart: string; // "HH:MM"
   fixedEnd: string; // "HH:MM"
+  limited: boolean;
+  windowStart: string;
+  windowEnd: string;
   /** Ngày lễ bắt buộc có mặt (Shin: Bá Việt Nguyen). */
   holidayDuty: boolean;
   shiftMin: string;
@@ -89,14 +71,13 @@ type OtherStore = { storeId: string; shortName: string; employees: readonly Empl
 const hoursText = (n: number) => String(n).replace(".", ",");
 const parseHours = (text: string) => Number(text.trim().replace(",", "."));
 
-function draftFrom(emp?: Employee, partners: PartnerChoice = {}): Draft {
+export function draftFrom(emp?: Employee, partners: PartnerChoice = {}, monthlyMinutes?: number): Draft {
   const available = emp?.availableWeekdays;
   return {
     name: emp?.name ?? "",
     employmentType: emp?.employmentType ?? "VOLLZEIT",
     station: emp?.station ?? "SERVICE",
-    unit: emp?.weeklyHours != null ? "week" : "month",
-    hours: emp ? hoursText(emp.weeklyHours ?? Math.round((emp.targetMinutes / 60) * 100) / 100) : "169",
+    hours: emp ? hoursText(Math.round(((monthlyMinutes ?? emp.targetMinutes) / 60) * 100) / 100) : "169",
     monthlySalary: emp?.monthlySalary != null ? hoursText(emp.monthlySalary) : "",
     hourlyRate: hoursText(emp?.hourlyRate ?? DEFAULT_HOURLY_RATE),
     maxDays: emp?.maxDaysPerWeek ? String(Math.min(6, emp.maxDaysPerWeek)) : "",
@@ -105,6 +86,9 @@ function draftFrom(emp?: Employee, partners: PartnerChoice = {}): Draft {
     // Vorhandene feste Schicht übernehmen, sonst die Voreinstellung anzeigen.
     fixedStart: emp?.fixedShift ? minutesToTime(emp.fixedShift.startMinutes) : FIXED_START_DEFAULT,
     fixedEnd: emp?.fixedShift ? minutesToTime(emp.fixedShift.endMinutes) : FIXED_END_DEFAULT,
+    limited: !!emp?.shiftWindow,
+    windowStart: minutesToTime(emp?.shiftWindow?.startMinutes ?? 660),
+    windowEnd: minutesToTime(emp?.shiftWindow?.endMinutes ?? 1290),
     holidayDuty: emp?.requiredOnHolidays ?? false,
     shiftMin: emp?.shiftHours ? hoursText(emp.shiftHours.min) : "",
     shiftMax: emp?.shiftHours ? hoursText(emp.shiftHours.max) : "",
@@ -154,12 +138,10 @@ function windowsFromDraft(d: Draft): Employee["preferredWindows"] {
 }
 
 /** Entwurf -> Mitarbeiter-Felder (ohne id). */
-function draftToEmployee(d: Draft): Omit<Employee, "id"> {
+export function draftToEmployee(d: Draft): Omit<Employee, "id"> {
   const hours = Math.max(0, parseHours(d.hours) || 0);
   const amount = parseHours(d.monthlySalary);
   const rate = parseHours(d.hourlyRate);
-  const salaryMode = d.monthlySalary.trim() !== "";
-  const validSalary = Number.isFinite(amount) && amount >= 0 && Number.isFinite(rate) && rate > 0 && Number.isSafeInteger(Math.round(amount / rate * 60));
   const tage = Number(d.maxDays);
   const fixedStart = safeMinutes(d.fixedStart, FIXED_START_DEFAULT);
   const fixedEnd = safeMinutes(d.fixedEnd, FIXED_END_DEFAULT);
@@ -168,19 +150,19 @@ function draftToEmployee(d: Draft): Omit<Employee, "id"> {
     name: d.name.trim() || "Nhân viên mới",
     employmentType: d.employmentType,
     station: d.station,
+    quotaSource: "hours",
     unavailableRanges: d.unavailableRanges.filter(range => range.startDate && range.endDate && range.startDate <= range.endDate),
-    // Monatsvertrag: die Stunden stehen direkt im Soll. Wochenvertrag: das
-    // Monats-Soll wird je Monat daraus abgeleitet (contract.ts).
-    targetMinutes: salaryMode ? (validSalary ? salaryToMinutes(amount, rate) : 0) : d.unit === "month" ? Math.round(hours * 60) : 0,
-    monthlySalary: salaryMode && validSalary ? amount : undefined,
+    targetMinutes: Math.round(hours * 60),
+    monthlySalary: Number.isFinite(amount) && amount >= 0 && d.monthlySalary.trim() !== "" ? amount : undefined,
     hourlyRate: Number.isFinite(rate) && rate > 0 ? rate : undefined,
-    weeklyHours: !salaryMode && d.unit === "week" ? hours : undefined,
+    weeklyHours: undefined,
     // Ende muss nach Beginn liegen – sonst die feste Schicht ignorieren, statt
     // eine kaputte Zeitspanne zu speichern.
     fixedShift:
       d.fixed && fixedEnd > fixedStart
         ? { startMinutes: fixedStart, endMinutes: fixedEnd }
         : undefined,
+    shiftWindow: d.limited ? { startMinutes: safeMinutes(d.windowStart,"11:00"), endMinutes: safeMinutes(d.windowEnd,"21:30") } : undefined,
     availableWeekdays: d.daysOff.length === 0 || available.length === 0 ? undefined : available,
     maxDaysPerWeek: d.maxDays === "" || tage < 1 ? undefined : Math.min(6, Math.round(tage)),
     requiredOnHolidays: d.holidayDuty ? true : undefined,
@@ -247,8 +229,7 @@ export function EmployeesTab({ store, allStores }: { store: UseScheduleReturn; a
         </button>
       </div>
       <p className="text-xs text-slate-500 mb-4">
-        Nhập tổng lương tháng và lương giờ (mặc định 13,90 €/h) để quy đổi giờ; bỏ trống lương tháng để nhập giờ trực tiếp. Giờ được chia cho các
-        tuần rồi cho từng ngày theo hệ số ngày đông. Tháng này quán mở <b>{openDays}</b> ngày, mỗi người tối
+        Nhập giờ/tháng; lương tháng và lương giờ được lưu riêng. Định mức tháng được phân bổ trên toàn tháng theo ngày có thể làm và nhu cầu. Tháng này quán mở <b>{openDays}</b> ngày, mỗi người tối
         đa 6 ngày liên tiếp và 8 giờ công mỗi ngày. Bấm vào một người để sửa.
       </p>
 
@@ -342,7 +323,6 @@ function EmployeeSummaryRow({
 }) {
   const monatMin = monthlyTargetMinutesFor(emp, openDates, workHours);
   const monatH = monatMin / 60;
-  const info = splitInfo(monatH, emp.employmentType);
   const ownRange = ownShiftRangeMinutes(emp);
 
   return (
@@ -365,8 +345,7 @@ function EmployeeSummaryRow({
           {emp.weeklyHours != null
             ? `${emp.weeklyHours}h/tuần`
             : `${String(Math.round((emp.targetMinutes / 60) * 100) / 100).replace(".", ",")}h/tháng`}{" "}
-          · {monatH > 0 ? `${minutesToShortHours(monatMin)} · ` : ""}
-          <span className={info.ok ? "" : "text-rose-600"}>{info.text}</span>
+          {emp.weeklyHours != null && monatH > 0 ? ` · tháng này ${minutesToShortHours(monatMin)}` : ""}
         </span>
         {emp.role && <span>{emp.role}</span>}
         {emp.monthlySalary != null && <span>{emp.monthlySalary.toLocaleString("vi-VN")} € / {emp.hourlyRate} €/h</span>}
@@ -567,7 +546,7 @@ function EmployeeSheet({
   onSave: (felder: Omit<Employee, "id">, partners: PartnerChoice) => void;
   onDelete?: () => void;
 }) {
-  const [d, setD] = useState<Draft>(() => draftFrom(employee, partners));
+  const [d, setD] = useState<Draft>(() => draftFrom(employee, partners, employee ? monthlyTargetMinutesFor(employee, openDates, workHours) : undefined));
   const [loeschFrage, setLoeschFrage] = useState(false);
   const [showPeriod, setShowPeriod] = useState(() => !!(employee?.startDate || employee?.endDate));
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -576,16 +555,13 @@ function EmployeeSheet({
   const toggle = (list: readonly WeekdayKey[], day: WeekdayKey) =>
     list.includes(day) ? list.filter((x) => x !== day) : [...list, day];
 
-  const monatMin = monthlyTargetMinutesFor({ ...draftToEmployee(d), id: employee?.id ?? "preview" }, openDates, workHours);
-  const info = splitInfo(monatMin / 60, d.employmentType);
-  const rate = parseHours(d.hourlyRate);
-  const amount = parseHours(d.monthlySalary);
-  const salaryBad = !Number.isFinite(rate) || rate <= 0 || (d.monthlySalary.trim() !== "" && (!Number.isFinite(amount) || amount < 0 || !Number.isSafeInteger(Math.round(amount / rate * 60))));
+  const hoursBad = !d.hours.trim() || !Number.isFinite(parseHours(d.hours)) || parseHours(d.hours)<0;
+  const windowBad = d.limited && (!d.windowStart || !d.windowEnd || d.windowEnd <= d.windowStart);
   const shiftMinH = parseHours(d.shiftMin);
   const shiftMaxH = parseHours(d.shiftMax);
   const shiftRangeOff =
     (d.shiftMin !== "" || d.shiftMax !== "") &&
-    (!(shiftMinH > 0) || !(shiftMaxH > 0) || shiftMinH < 3 || shiftMaxH > 8);
+    (!(shiftMinH > 0) || !(shiftMaxH > 0) || shiftMinH < 1 || shiftMaxH > 8);
   const fixedBad =
     d.fixed && safeMinutes(d.fixedEnd, FIXED_END_DEFAULT) <= safeMinutes(d.fixedStart, FIXED_START_DEFAULT);
 
@@ -647,30 +623,21 @@ function EmployeeSheet({
                 ]}
               />
             </div>
-            <label className="block">
-              <FieldLabel>Tổng lương tháng (€ brutto)</FieldLabel>
-              <HoursInput value={d.monthlySalary} onChange={v => set("monthlySalary", v)} placeholder="VD 2500; bỏ trống để nhập giờ" unit="€" />
-            </label>
-            <label className="block">
-              <FieldLabel>Lương theo giờ (€/h)</FieldLabel>
-              <HoursInput value={d.hourlyRate} onChange={v => set("hourlyRate", v)} placeholder="13,90" unit="€/h" />
-            </label>
-            {salaryBad && <p role="alert" className="text-sm text-rose-600">Lương tháng phải từ 0; lương giờ phải lớn hơn 0, số tiền hữu hạn.</p>}
-            {d.monthlySalary.trim() !== "" && !salaryBad && <p className="text-sm text-slate-600">
-              {d.monthlySalary} € ÷ {d.hourlyRate} €/h = {(amount / rate).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} giờ (≈ {Math.round(amount / rate)} giờ).
-              Quy đổi tham khảo, không thay thế chấm công thực tế.
-            </p>}
-            <div>
-              <FieldLabel hint={`tháng này ≈ ${minutesToShortHours(monatMin)} · ${info.text}`}>
-                {d.unit === "week" ? "Giờ / tuần" : "Giờ / tháng"}
-              </FieldLabel>
-              {d.monthlySalary.trim() !== "" ? <p className="text-sm font-medium">{minutesToShortHours(monatMin)} — tự tính từ lương tháng</p> : <HoursInput
-                value={d.hours}
-                onChange={(v) => set("hours", v)}
-                placeholder={d.unit === "week" ? "VD 39" : "VD 169"}
-              />}
-              {!info.ok && <p className="mt-1 text-xs text-rose-600">{info.text}</p>}
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block min-w-0">
+                <FieldLabel>Lương tháng (€)</FieldLabel>
+                <HoursInput value={d.monthlySalary} onChange={v => set("monthlySalary", v)} placeholder="VD 2500" unit="€" />
+              </label>
+              <label className="block min-w-0">
+                <FieldLabel>Lương giờ (€/h)</FieldLabel>
+                <HoursInput value={d.hourlyRate} onChange={v => set("hourlyRate", v)} placeholder="13,90" unit="€/h" />
+              </label>
             </div>
+            <label className="block">
+              <FieldLabel>Giờ / tháng</FieldLabel>
+              <HoursInput value={d.hours} onChange={v => set("hours", v)} placeholder="VD 169" />
+              {hoursBad && <p role="alert" className="mt-1 text-xs text-rose-600">Giờ phải là số từ 0 trở lên.</p>}
+            </label>
           </SheetSection>
 
           {/* Nâng cao: alles außer Tên, Hình thức, Bộ phận, Giờ. In der Demo gesperrt. */}
@@ -691,25 +658,8 @@ function EmployeeSheet({
             </button>
             {showAdvanced && (
               <div className="space-y-6 border-t border-slate-100 px-3 py-4">
-                {!ADVANCED_EDITABLE && (
-                  <p className="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">
-                    Bản demo không cho sửa phần này. Liên hệ <b>Thanh Tùng</b> để mở.
-                  </p>
-                )}
-                {/* fieldset disabled sperrt alle Eingaben darin auf einmal. */}
-                <fieldset disabled={!ADVANCED_EDITABLE} className={`space-y-6 ${ADVANCED_EDITABLE ? "" : "opacity-50"}`}>
+                <fieldset className="space-y-6">
                   <SheetSection title="Hợp đồng">
-                    <div>
-                      <FieldLabel>Hợp đồng theo</FieldLabel>
-                      <Segmented<Draft["unit"]>
-                        value={d.unit}
-                        onChange={(v) => set("unit", v)}
-                        options={[
-                          { value: "month", label: "Tháng" },
-                          { value: "week", label: "Tuần" },
-                        ]}
-                      />
-                    </div>
                     <div>
                       <FieldLabel hint="bỏ trống = tự động">Số ngày làm / tuần</FieldLabel>
                       <div className="grid grid-cols-7 gap-1">
@@ -743,7 +693,7 @@ function EmployeeSheet({
 
                   <SheetSection title="Luật riêng (mềm – xếp theo khi được)">
                     <div>
-                      <FieldLabel hint="3–8 h · bỏ trống = mặc định">Độ dài ca</FieldLabel>
+                      <FieldLabel hint="1–8 h · ưu tiên mềm">Độ dài ca</FieldLabel>
                       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                         <HoursInput placeholder="từ" value={d.shiftMin} onChange={(v) => set("shiftMin", v)} />
                         <span className="text-slate-400">–</span>
@@ -751,7 +701,7 @@ function EmployeeSheet({
                       </div>
                       {shiftRangeOff && (
                         <p className="mt-1 text-xs text-amber-700">
-                          Nhập cả hai ô, trong khoảng 3–8 h (luật quán). Ngoài khoảng đó app tự làm tròn vào 3–8 h.
+                          Nhập cả hai ô trong khoảng 1–8 h. Độ dài ca là ưu tiên mềm; đủ giờ và phủ nhân sự được ưu tiên hơn.
                         </p>
                       )}
                     </div>
@@ -817,6 +767,12 @@ function EmployeeSheet({
                   </SheetSection>
 
                   <SheetSection title="Luật cứng">
+                    <CheckRow label="Giới hạn khung giờ được làm" note="Chỉ xếp trong khung này; tắt để cho phép toàn bộ giờ mở cửa." checked={d.limited} onChange={v=>set("limited",v)} />
+                    {d.limited && <div className="grid grid-cols-2 gap-2">
+                      <label>Được làm từ<input aria-label="Được làm từ" type="time" step={1800} className={`${inputClass} w-full`} value={d.windowStart} onChange={e=>set("windowStart",e.target.value)} /></label>
+                      <label>Được làm đến<input aria-label="Được làm đến" type="time" step={1800} className={`${inputClass} w-full`} value={d.windowEnd} onChange={e=>set("windowEnd",e.target.value)} /></label>
+                    </div>}
+                    {windowBad && <p role="alert" className="text-sm text-rose-600">Giờ kết thúc khung phải sau giờ bắt đầu.</p>}
                     <CheckRow
                       label="Trực ngày lễ"
                       note="Ngày lễ nào quán mở thì người này luôn có ca."
@@ -997,7 +953,7 @@ function EmployeeSheet({
               </button>
               <button
                 onClick={() => onSave(draftToEmployee(d), d.partners)}
-                disabled={d.name.trim().length === 0 || salaryBad || d.unavailableRanges.some(range => Boolean(range.startDate || range.endDate) && (!range.startDate || !range.endDate || range.startDate > range.endDate))}
+                disabled={d.name.trim().length === 0 || hoursBad || windowBad || fixedBad || d.unavailableRanges.some(range => Boolean(range.startDate || range.endDate) && (!range.startDate || !range.endDate || range.startDate > range.endDate))}
                 className="rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-40"
               >
                 Lưu
