@@ -99,21 +99,28 @@ function MainApp() {
    * ist an seinen schon verplanten Tagen im nächsten Laden blockiert – die
    * Läden liegen zu weit auseinander für zwei Dienste am selben Tag.
    */
-  const generateAll = (target: { year: number; month: number }) => {
-    const busyByPerson = new Map<string, Set<string>>();
-    for (const s of stores) {
-      const blocked: Record<string, string[]> = {};
-      for (const employee of s.schedule.employees) {
-        const dates = employee.personKey ? busyByPerson.get(employee.personKey) : undefined;
-        if (dates?.size) blocked[employee.id] = [...dates];
+  const [isGenerating, setIsGenerating] = useState(false);
+  const generateAll = async (target: { year: number; month: number }) => {
+    if (isGenerating) return;
+    setIsGenerating(true);
+    try {
+      const busyByPerson = new Map<string, Set<string>>();
+      for (const s of stores) {
+        const blocked: Record<string, string[]> = {};
+        for (const employee of s.schedule.employees) {
+          const dates = employee.personKey ? busyByPerson.get(employee.personKey) : undefined;
+          if (dates?.size) blocked[employee.id] = [...dates];
+        }
+        const shifts = await s.generate(target, blocked);
+        for (const employee of s.schedule.employees) {
+          if (!employee.personKey) continue;
+          const dates = busyByPerson.get(employee.personKey) ?? new Set<string>();
+          for (const shift of shifts) if (shift.employeeId === employee.id) dates.add(shift.date);
+          busyByPerson.set(employee.personKey, dates);
+        }
       }
-      const shifts = s.generate(target, blocked);
-      for (const employee of s.schedule.employees) {
-        if (!employee.personKey) continue;
-        const dates = busyByPerson.get(employee.personKey) ?? new Set<string>();
-        for (const shift of shifts) if (shift.employeeId === employee.id) dates.add(shift.date);
-        busyByPerson.set(employee.personKey, dates);
-      }
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -132,7 +139,7 @@ function MainApp() {
   useEffect(() => {
     if (!regenPending) return;
     setRegenPending(false);
-    generateAll({ year: primary.schedule.year, month: primary.schedule.month });
+    void generateAll({ year: primary.schedule.year, month: primary.schedule.month });
     openTab("dienstplan");
   }, [regenPending]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -170,6 +177,16 @@ function MainApp() {
 
   return (
     <div className="min-h-screen">
+      {isGenerating && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40" role="dialog" aria-modal="true" aria-label="Đang tạo lịch">
+          <div className="rounded-xl bg-white px-8 py-6 text-center shadow-xl" role="status" aria-live="polite">
+            <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-700" />
+            <p className="font-semibold">Đang tối ưu lịch…</p>
+            <p className="mt-2 text-sm text-slate-600">Đang cân bằng cao điểm, kiểm tra giờ làm và ngày nghỉ.</p>
+          </div>
+        </div>
+      )}
+      <div ref={node => { if (node) node.inert = isGenerating; }}>
       {/* iPhone-App vom Home-Bildschirm (black-translucent): Inhalt unter die Statusleiste schieben. */}
       <header className="no-print bg-slate-900 text-white shadow sticky top-0 z-30 pt-[env(safe-area-inset-top)]">
         <div className="mx-auto max-w-[1500px] px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
@@ -327,9 +344,9 @@ function MainApp() {
           isLocked={stores.some((s) => s.isLocked)}
           dateOverrides={stores.flatMap((s) => s.schedule.dateOverrides)}
           onClose={() => setGenDialogOpen(false)}
-          onConfirm={(target) => {
+          onConfirm={async (target) => {
             setGenDialogOpen(false);
-            generateAll(target);
+            await generateAll(target);
             if (tab !== "lich") openTab("dienstplan");
           }}
         />
@@ -460,6 +477,7 @@ function MainApp() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

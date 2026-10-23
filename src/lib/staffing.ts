@@ -216,6 +216,11 @@ export function workingAt(shift: Shift, minute: number): boolean {
 export function staffAt(shifts: Shift[], employees: Map<string, Employee>, minute: number): Employee[] {
   const present = [...new Set(shifts.filter(s => workingAt(s, minute)).map(s => s.employeeId))]
     .map(id => employees.get(id)).filter((e): e is Employee => !!e);
+  return assignStations(present);
+}
+
+/** Shared role resolution for reports and the scheduler's cached slot masks. */
+export function assignStations(present: Employee[]): Employee[] {
   const flexible = present.filter(e => e.station === "BOTH").sort((a, b) => a.id.localeCompare(b.id));
   const cook = present.some(e => e.station === "KITCHEN") ? undefined : flexible[0]?.id;
   return present.map(e => e.station === "BOTH" ? { ...e, station: e.id === cook ? "KITCHEN" : "SERVICE" } : e);

@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Employee, Schedule, Shift } from "../types";
-import { generateSchedule } from "../lib/scheduler";
+import { generateScheduleInWorker } from "../lib/scheduleWorker";
 import { isScheduleYearAllowed, SCHEDULE_YEAR_RANGE_LABEL } from "../lib/years";
 import { analyzeSchedule } from "../lib/analyze";
 import { validateSchedule, type ValidationResult } from "../lib/validation";
@@ -390,10 +390,10 @@ export function useSchedule(storeId: string) {
    * Läden nacheinander geplant werden: wer im ersten Laden schon einen Tag hat,
    * ist im nächsten an diesem Tag blockiert (blockedDays).
    */
-  const generate = useCallback((
+  const generate = useCallback(async (
     target?: { year: number; month: number },
     blockedDays?: Record<string, readonly string[]>,
-  ): Shift[] => {
+  ): Promise<Shift[]> => {
     setGenError(null);
     const year = target?.year ?? schedule.year;
     const month = target?.month ?? schedule.month;
@@ -402,13 +402,12 @@ export function useSchedule(storeId: string) {
       return [];
     }
     try {
-      const shifts = generateSchedule({
+      const shifts = await generateScheduleInWorker({
         year,
         month,
         workHours: schedule.workHours,
         overrides: overridesToMap(schedule.dateOverrides),
         employees: schedule.employees,
-        rules: storeConfig.staffingRules,
         weights: storeConfig.dayWeights,
         demandProfile: storeConfig.demandProfile,
         blockedDays,

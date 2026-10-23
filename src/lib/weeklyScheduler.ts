@@ -4,6 +4,7 @@ import { DAY_WEIGHTS, datesOfMonth, parseIsoDate, weekdayKeyOf, type WeekdayKey 
 import { monthlyTargetMinutesFor, weeklyBudgetMinutes, weeklyTargetMinutes } from "./contract";
 import { calculatePause } from "./time";
 import { mayWorkOn } from "./availability";
+import { peakBalanceTargets, type BalanceSlot } from "./peakBalance";
 import { consecutiveRunLengthWith } from "./consecutive";
 import { effectiveWeekdayKey, resolveDay, type DayBlocks, type DayWindow, type OverrideMap, type WorkHoursConfig } from "./workHours";
 import { publicHolidays } from "./holidays";
@@ -16,7 +17,7 @@ import {
   staffingWindows,
   weightedDailyTargets,
   workingAt,
-  staffAt,
+  assignStations,
   workloadAt,
   type StaffingRule,
   type StaffingWindow,
@@ -29,8 +30,14 @@ import {
  * weder Regeln noch Zwischenergebnisse teilen.
  */
 type Ctx = {
+  options: Map<string, Option[]>;
+  costs: Map<string, Cost>;
+  stationSubsets: Map<number, Employee[]>;
+  employeeBits: Map<string, number>;
+  balanceTargets?: Map<string, Map<number, { service: number; kitchen: number; weight: number }>>;
   models: Map<string, DayModel>;
   exhaustivePauses?: boolean;
+  peakPolish?: boolean;
   rules: readonly StaffingRule[];
   weights: Record<WeekdayKey, number>;
   demandProfile?: readonly DemandBand[];
@@ -67,12 +74,12 @@ type Allocation = { paid: number; cost: Cost; mask: number; choices: Choice[] };
 type Day = ReturnType<typeof resolveDay>;
 
 // Compare objectives separately; no soft weight can buy a required staffing gap.
-type Cost = [required: number, preparation: number, coverage: number, preferences: number];
-const zeroCost = (): Cost => [0, 0, 0, 0];
-const infiniteCost = (): Cost => [Infinity, Infinity, Infinity, Infinity];
-const addCost = (a: Cost, b: Cost): Cost => [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]];
-const subtractCost = (a: Cost, b: Cost): Cost => [a[0] - b[0], a[1] - b[1], a[2] - b[2], a[3] - b[3]];
-const preferenceCost = (a: Cost, value: number): Cost => [a[0], a[1], a[2], a[3] + value];
+type Cost = [required: number, preparation: number, coverage: number, balance: number, preferences: number];
+const zeroCost = (): Cost => [0, 0, 0, 0, 0];
+const infiniteCost = (): Cost => [Infinity, Infinity, Infinity, Infinity, Infinity];
+const addCost = (a: Cost, b: Cost): Cost => a.map((v, i) => v + b[i]) as Cost;
+const subtractCost = (a: Cost, b: Cost): Cost => a.map((v, i) => v - b[i]) as Cost;
+const preferenceCost = (a: Cost, value: number): Cost => [a[0], a[1], a[2], a[3], a[4] + value];
 function cheaper(a: Cost, b: Cost, epsilon = 0): boolean {
   for (let i = 0; i < a.length; i++) {
     if (Math.abs(a[i] - b[i]) > epsilon) return a[i] < b[i];
@@ -186,6 +193,23 @@ function optionsFor(
   effectiveWeekday: WeekdayKey | undefined,
   ctx: Ctx,
 ): Option[] {
+  const key = `${employee.id}|${date}|${paid}|${partialWeek}|${effectiveWeekday}|${!!ctx.exhaustivePauses}|${blocks.map(b => `${b.startMinutes}-${b.endMinutes}`).join(",")}`;
+  const cached = ctx.options.get(key);
+  if (cached) return cached;
+  const options = calculateOptions(employee, date, paid, blocks, partialWeek, effectiveWeekday, ctx);
+  ctx.options.set(key, options);
+  return options;
+}
+
+function calculateOptions(
+  employee: Employee,
+  date: string,
+  paid: number,
+  blocks: DayBlocks,
+  partialWeek: boolean,
+  effectiveWeekday: WeekdayKey | undefined,
+  ctx: Ctx,
+): Option[] {
   if (paid <= 0 || paid > MAX_PAID) return [];
   blocks = blocksFor(employee, blocks);
   if (employee.fixedShift) {
@@ -237,6 +261,7 @@ function optionsFor(
  * and, per staffing window, which slots it covers and for how many minutes.
  */
 type DayModel = {
+  masks: Map<string, number[]>;
   minutes: number[];
   targets: number[];
   windows: { slots: number[]; overlap: number[]; minStaff: number; maxStaff: number; who?: (employee: Employee) => boolean; weight?: number; priority?: StaffingRule["priority"] }[];
@@ -256,7 +281,7 @@ function dayModel(blocks: DayBlocks, weekday: WeekdayKey, targetHours: number, c
     });
     return { slots, overlap, minStaff: window.minStaff, maxStaff: window.maxStaff, who: window.who, weight: window.weight, priority: window.priority };
   });
-  const model = { minutes, targets: slotList.map(([, target]) => target), windows };
+  const model = { masks: new Map<string, number[]>(), minutes, targets: slotList.map(([, target]) => target), windows };
   ctx.models.set(key, model);
   return model;
 }
@@ -268,14 +293,49 @@ function dayModel(blocks: DayBlocks, weekday: WeekdayKey, targetHours: number, c
  *  - paid hours: squared deviation from the day's weighted hours.
  */
 function dayCost(shifts: Shift[], blocks: DayBlocks, weekday: WeekdayKey, targetHours: number | undefined, ctx: Ctx, date: string): Cost {
+  const key = date + ":" + targetHours + ":" + shifts.map(s => [s.employeeId, s.startMinutes, s.endMinutes,
+    s.paidMinutes, s.pauseMinutes, s.pauseStartMinutes ?? ""].join(",")).sort().join(";");
+  const cached = ctx.costs.get(key);
+  if (cached) return cached;
+  const cost = calculateDayCost(shifts, blocks, weekday, targetHours, ctx, date);
+  // Bound memory during the coordinated search. Cache belongs to one planning
+  // invocation; changed rules, availability or fairness targets cannot reuse it.
+  if (ctx.costs.size >= 20000) ctx.costs.clear();
+  ctx.costs.set(key, cost);
+  return cost;
+}
+
+function calculateDayCost(shifts: Shift[], blocks: DayBlocks, weekday: WeekdayKey, targetHours: number | undefined, ctx: Ctx, date: string): Cost {
   if (blocks.length === 0) return zeroCost();
   const model = dayModel(blocks, weekday, targetHours ?? 0, ctx, ctx.holidays.has(date));
-  const counts = model.minutes.map((minute) => {
-    let staff = 0;
-    for (const shift of shifts) if (workingAt(shift, minute)) staff++;
+  const counts = model.minutes.map(() => 0);
+  const byEmployee = new Map<string, { employee: Employee; mask: number[] }>();
+  for (const shift of shifts) {
+    const key = `${shift.startMinutes},${shift.endMinutes},${shift.pauseMinutes},${shift.pauseStartMinutes ?? ""}`;
+    let mask = model.masks.get(key);
+    if (!mask) {
+      mask = model.minutes.map(minute => Number(workingAt(shift, minute)));
+      model.masks.set(key, mask);
+    }
+    for (let i = 0; i < counts.length; i++) counts[i] += mask[i];
+    const employee = ctx.employeesById.get(shift.employeeId);
+    if (!employee) continue;
+    const previous = byEmployee.get(employee.id);
+    byEmployee.set(employee.id, { employee, mask: previous ? mask.map((v, i) => v || previous.mask[i]) : mask });
+  }
+  const members = [...byEmployee.values()];
+  const assigned = model.minutes.map((_, i) => {
+    // At most 30 employees fit the bitmask; larger teams keep the general path.
+    if (ctx.employeesById.size > 30) return assignStations(members.filter(m => m.mask[i]).map(m => m.employee));
+    let bits = 0;
+    for (const member of members) if (member.mask[i]) bits |= ctx.employeeBits.get(member.employee.id)!;
+    let staff = ctx.stationSubsets.get(bits);
+    if (!staff) {
+      staff = assignStations([...ctx.employeesById.values()].filter(e => bits & ctx.employeeBits.get(e.id)!));
+      ctx.stationSubsets.set(bits, staff);
+    }
     return staff;
   });
-  const assigned = model.minutes.map(minute => staffAt(shifts, ctx.employeesById, minute));
   let cost = 0;
   let required = 0, preparation = 0, coverage = 0;
   for (const window of model.windows) {
@@ -299,7 +359,18 @@ function dayCost(shifts: Shift[], blocks: DayBlocks, weekday: WeekdayKey, target
     const windows = ctx.windows.get(shift.employeeId);
     if (windows) cost += minutesOutsidePreferred(windows, dayOf(shift.date), shift) * OUTSIDE_WINDOW_COST;
   }
-  return [required, preparation, coverage, cost];
+  let balance = 0;
+  const targets = ctx.balanceTargets?.get(date);
+  if (targets) for (let i = 0; i < model.minutes.length; i++) {
+    const target = targets.get(model.minutes[i]);
+    if (!target) continue;
+    const kitchen = assigned[i].filter(e => e.station === "KITCHEN").length;
+    const service = assigned[i].length - kitchen;
+    balance += SLOT * ((service - target.service) ** 2 + (kitchen - target.kitchen) ** 2) / target.weight;
+    balance += SLOT * Math.max(0, service - Math.ceil(target.service)) ** 2 * (ctx.peakPolish ? 1200 : 10);
+  }
+  if (targets) balance += (paidHours - (targetHours ?? 0)) ** 2 * 120;
+  return [required, preparation, coverage, balance, cost];
 }
 
 function dayLimit(employee: Employee): number {
@@ -571,7 +642,9 @@ function repairMonthlyCoverage(result: Shift[], employees: Employee[], days: Map
     effectiveWeekdayKey(date, holidays), dailyTargets.get(date), ctx, date);
   let scores = new Map([...days.keys()].map(date => [date, scoreDay(date, state)]));
   let total = [...scores.values()].reduce(addCost, zeroCost()), bestCost = total;
-  const scalar = (c: Cost) => c[0] * 1000 + c[1] * 30 + c[2] + c[3] * 1e-8;
+  const scalar = (c: Cost) => ctx.balanceTargets
+    ? c[0] * 10000 + c[1] * 100 + c[2] + c[3] * .02 + c[4] * 1e-8
+    : c[0] * 1000 + c[1] * 30 + c[2] + c[4] * 1e-8;
   let seed = 73451;
   const random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
   const pick = <T,>(list: T[]): T => list[Math.floor(random() * list.length)];
@@ -638,6 +711,7 @@ function repairMonthlyCoverage(result: Shift[], employees: Employee[], days: Map
 /** Transfer paid time between existing days without locking a monthly contract to weeks. */
 function redistributeDurations(result: Shift[], employees: Employee[], days: Map<string, Day>, holidays: Set<string>, dailyTargets: Map<string, number>, ctx: Ctx): Shift[] {
   let shifts = result;
+  const initialMinutes = new Map([...days.keys()].map(date => [date, result.filter(s => s.date === date).reduce((sum,s) => sum+s.paidMinutes,0)]));
   for (let pass = 0; pass < 8; pass++) {
     let changed = false;
     for (const employee of employees) {
@@ -650,6 +724,7 @@ function redistributeDurations(result: Shift[], employees: Employee[], days: Map
           if (paid < MIN_SHIFT || paid > MAX_PAID || own.filter(s => s.date === old.date).length !== 1) return [];
           const day = days.get(old.date)!;
           const others = shifts.filter(s => s.date === old.date && s !== old);
+          if (ctx.peakPolish && Math.abs(others.reduce((sum,s) => sum+s.paidMinutes,0) + paid - initialMinutes.get(old.date)!) > SLOT) return [];
           const weekday = effectiveWeekdayKey(old.date, holidays);
           const before = dayCost([...others, old], day.blocks, weekday, dailyTargets.get(old.date), ctx, old.date);
           let next: Shift[] | undefined, cost = infiniteCost();
@@ -709,40 +784,6 @@ function swapWorkdays(result: Shift[], employees: Employee[], days: Map<string, 
     }
     if (!best) break;
     shifts = [...shifts.filter(s => s !== best.a && s !== best.b), ...best.next];
-  }
-  return shifts;
-}
-
-/** Move whole continuous shifts across the month, preserving monthly paid hours. */
-function rebalanceMonth(result: Shift[], employees: Employee[], days: Map<string, Day>, holidays: Set<string>, dailyTargets: Map<string, number>, ctx: Ctx): Shift[] {
-  let shifts = result;
-  const costOf = (date: string, list: Shift[]) => dayCost(list.filter(s => s.date === date), days.get(date)!.blocks,
-    effectiveWeekdayKey(date, holidays), dailyTargets.get(date), ctx, date);
-  for (let pass = 0; pass < 4; pass++) {
-    let changed = false;
-    for (const employee of employees) {
-      if (employee.weeklyHours != null || employee.fixedShift) continue;
-      const own = shifts.filter(s => s.employeeId === employee.id);
-      let best: { old: Shift; next: Shift[]; cost: Cost } | undefined;
-      for (const old of own) {
-        if (own.filter(s => s.date === old.date).length !== 1) continue;
-        const without = shifts.filter(s => s !== old);
-        const worked = new Set([...own.filter(s => s !== old).map(s => s.date), ...(ctx.blocked.get(employee.id) ?? [])]);
-        const removed = subtractCost(costOf(old.date, without), costOf(old.date, shifts));
-        for (const [date, day] of days) {
-          if (date === old.date || costOf(date, shifts)[2] === 0 || day.closed || worked.has(date) || !mayWorkOn(employee, date)) continue;
-          if (consecutiveRunLengthWith(worked, date) > 6) continue;
-          if ([...worked].filter(d => weekStartOf(d) === weekStartOf(date)).length >= dayLimit(employee)) continue;
-          const before = costOf(date, without);
-          for (const option of optionsFor(employee, date, old.paidMinutes, day.blocks, false, effectiveWeekdayKey(date, holidays), ctx)) {
-            const cost = addCost(removed, subtractCost(costOf(date, [...without, ...option.shifts]), before));
-            if (cheaper(cost, best?.cost ?? zeroCost(), 0.01)) best = { old, next: option.shifts, cost };
-          }
-        }
-      }
-      if (best) { shifts = [...shifts.filter(s => s !== best.old), ...best.next]; changed = true; }
-    }
-    if (!changed) break;
   }
   return shifts;
 }
@@ -849,6 +890,10 @@ function improveCoverage(result: Shift[], employees: Employee[], days: Map<strin
 
 export function generateWeeklySchedule(input: WeeklyInput, existing: Shift[] = []): Shift[] {
   const ctx: Ctx = {
+    options: new Map(),
+    costs: new Map(),
+    stationSubsets: new Map(),
+    employeeBits: new Map(input.employees.map((e, i) => [e.id, 1 << i])),
     models: new Map(),
     rules: input.rules ?? STAFFING_RULES,
     weights: input.weights ?? DAY_WEIGHTS,
@@ -877,6 +922,29 @@ export function generateWeeklySchedule(input: WeeklyInput, existing: Shift[] = [
   const weeks = [...byWeek].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
   const typeRank = (employee: Employee) => employee.employmentType === "VOLLZEIT" ? 0 : employee.employmentType === "TEILZEIT" ? 1 : 2;
   const hasCoverageObjective = ctx.rules.some(rule => rule.priority === "coverage");
+  let balanceTargets: Ctx["balanceTargets"];
+  if (hasCoverageObjective && input.demandProfile?.length) {
+    const peakLevel = Math.max(...input.demandProfile.map(b => b.level));
+    const slots: BalanceSlot[] = [];
+    for (const [date, day] of days) {
+      if (day.closed) continue;
+      const weekday = effectiveWeekdayKey(date, holidays);
+      for (const block of day.blocks) for (let minute = block.startMinutes; minute < block.endMinutes; minute += SLOT) {
+        slots.push({ date, minute, duration: Math.min(SLOT, block.endMinutes - minute),
+          weight: ctx.weights[weekday], peak: workloadAt(minute, weekday, ctx.weights, input.demandProfile) === peakLevel });
+      }
+    }
+    const capacity = { service: 0, kitchen: 0, flexible: 0 };
+    for (const e of input.employees) {
+      const available = slots.filter(s => mayWorkOn(e, s.date) && !ctx.blocked.get(e.id)?.has(s.date) &&
+        (!e.shiftWindow || (s.minute >= e.shiftWindow.startMinutes && s.minute + s.duration <= e.shiftWindow.endMinutes)))
+        .reduce((sum, s) => sum + s.duration, 0);
+      const quota = Math.floor(monthlyTargetMinutesFor(e, openDates, input.workHours) / SLOT) * SLOT;
+      const role = e.station === "KITCHEN" ? "kitchen" : e.station === "BOTH" ? "flexible" : "service";
+      capacity[role] += Math.min(quota, available);
+    }
+    balanceTargets = peakBalanceTargets(slots, capacity);
+  }
   const flexibility = (employee: Employee) => {
     const window = employee.shiftWindow;
     return (employee.availableWeekdays?.length ?? 7) * (window ? window.endMinutes - window.startMinutes : 1440);
@@ -936,9 +1004,13 @@ export function generateWeeklySchedule(input: WeeklyInput, existing: Shift[] = [
     );
     for (const [date, hours] of targets) dailyTargets.set(date, hours);
   };
+  if (hasCoverageObjective) {
+    spreadByWeight(openDates, [...budgets.values()].reduce((sum, weekly) => sum + [...weekly.values()].reduce((a,b) => a+b,0),0) / 60);
+  } else {
   for (const [weekStart, weekDates] of byWeek) {
     const weekMinutes = [...budgets.values()].reduce((sum, weekly) => sum + (weekly.get(weekStart) ?? 0), 0);
     spreadByWeight(weekDates, weekMinutes / 60);
+  }
   }
   for (const employee of employees) {
     const weekly = budgets.get(employee.id)!;
@@ -948,7 +1020,7 @@ export function generateWeeklySchedule(input: WeeklyInput, existing: Shift[] = [
     }
   }
   // Refit to actual available hours (new hires can reduce a week's budget).
-  for (const [, weekDates] of byWeek) {
+  for (const [, weekDates] of hasCoverageObjective ? [] : byWeek) {
     const actual = result.filter((s) => weekDates.includes(s.date)).reduce((sum, s) => sum + s.paidMinutes, 0) / 60;
     spreadByWeight(weekDates, actual);
   }
@@ -1007,61 +1079,27 @@ export function generateWeeklySchedule(input: WeeklyInput, existing: Shift[] = [
 
   result = improveCoverage(result, employees, days, holidays, dailyTargets, ctx);
   if (hasCoverageObjective) {
-    // Greedy allocation depends on employee order. Keep the best complete plan,
-    // never trade covered peak/kitchen minutes for preparation or preferences.
-    const score = (candidate: Shift[]) => [...days].reduce((sum, [date, day]) => addCost(sum,
-      dayCost(candidate.filter(s => s.date === date), day.blocks, effectiveWeekdayKey(date, holidays), dailyTargets.get(date), ctx, date)), zeroCost());
-    let bestCost = score(result);
-    // Seed flexible employees as service so pure cooks first cover their own
-    // station; resolve their actual roles with the shared staffAt afterwards.
     if (input.employees.some(e => e.station === "BOTH")) {
-      const serviceSeed = generateWeeklySchedule({ ...input,
+      result = generateWeeklySchedule({ ...input,
         employees: input.employees.map(e => e.station === "BOTH" ? { ...e, station: "SERVICE" as const } : e),
         rules: ctx.rules.map(rule => rule.priority ? { ...rule, priority: "required" as const } : rule),
       }, existing);
-      const servicePlan = repairMonthlyCoverage(improveCoverage(serviceSeed, employees, days, holidays, dailyTargets, ctx), employees, days, holidays, dailyTargets, ctx);
-      if (cheaper(score(servicePlan), bestCost)) { result = servicePlan; bestCost = score(result); }
     }
-    const fullCoverageSeed = generateWeeklySchedule({ ...input, rules: ctx.rules.map(rule =>
-      rule.priority ? { ...rule, priority: "required" as const } : rule) }, existing);
-    const fullCoveragePlan = improveCoverage(fullCoverageSeed, employees, days, holidays, dailyTargets, ctx);
-    if (cheaper(score(fullCoveragePlan), bestCost)) { result = fullCoveragePlan; bestCost = score(result); }
-
-    // Feasibility seed: allocate mandatory peak/kitchen rules first, then
-    // polish preparation and all-day coverage without worsening that baseline.
-    const mandatorySeed = generateWeeklySchedule({ ...input, rules: ctx.rules
-      .filter(rule => rule.priority !== "preparation")
-      .map(rule => ({ ...rule, priority: undefined })) }, existing);
-    let feasible = improveCoverage(mandatorySeed, employees, days, holidays, dailyTargets, ctx);
-    for (let pass = 0; pass < 3; pass++) {
-      let changed = false;
-      for (const [weekStart, weekDates] of weeks) for (const employee of [...employees].reverse()) {
-        if (employee.fixedShift) continue;
-        const own = feasible.filter(s => s.employeeId === employee.id && weekStartOf(s.date) === weekStart);
-        const paid = own.reduce((sum, s) => sum + s.paidMinutes, 0);
-        if (!paid) continue;
-        const others = feasible.filter(s => !own.includes(s));
-        const next = chooseWeek(employee, weekDates, paid, others, days, holidays, dailyTargets, ctx)
-          .flatMap(choice => choice.option.shifts);
-        if (next.reduce((sum, s) => sum + s.paidMinutes, 0) !== paid) continue;
-        const candidate = [...others, ...next];
-        if (cheaper(score(candidate), score(feasible))) { feasible = candidate; changed = true; }
-      }
-      if (!changed) break;
-    }
-    feasible = improveCoverage(feasible, employees, days, holidays, dailyTargets, ctx);
-    const feasibleCost = score(feasible);
-    if (cheaper(feasibleCost, bestCost)) { result = feasible; bestCost = feasibleCost; }
-
-  }
-  if (hasCoverageObjective) {
     result = repairMonthlyCoverage(result, employees, days, holidays, dailyTargets, ctx);
-    ctx.exhaustivePauses = true;
-    result = swapWorkdays(result, employees, days, holidays, dailyTargets, ctx);
-    result = redistributeDurations(result, employees, days, holidays, dailyTargets, ctx);
-    result = rebalanceMonth(result, employees, days, holidays, dailyTargets, ctx);
     result = improveCoverage(result, employees, days, holidays, dailyTargets, ctx);
-
+    ctx.balanceTargets = balanceTargets;
+    ctx.costs.clear();
+    result = repairMonthlyCoverage(result, employees, days, holidays, dailyTargets, ctx);
+    result = improveCoverage(result, employees, days, holidays, dailyTargets, ctx);
+    result = redistributeDurations(result, employees, days, holidays, dailyTargets, ctx);
+    result = swapWorkdays(result, employees, days, holidays, dailyTargets, ctx);
+    // Remove concentrated surplus without restarting the monthly search.
+    // This last transfer pass may change each day's total by at most one slot.
+    ctx.peakPolish = true;
+    ctx.costs.clear();
+    ctx.options.clear();
+    result = redistributeDurations(result, employees, days, holidays, dailyTargets, ctx);
+    result = improveCoverage(result, employees, days, holidays, dailyTargets, ctx);
   }
   return result.sort((a, b) => a.date.localeCompare(b.date) || a.startMinutes - b.startMinutes || a.employeeId.localeCompare(b.employeeId));
 }
