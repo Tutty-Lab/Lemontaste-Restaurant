@@ -11,6 +11,7 @@ export type StaffingWindow = {
   /** Nur diese Leute zählen (z. B. nur Bếp); fehlt = alle. */
   who?: (employee: Employee) => boolean;
   weight?: number;
+  priority?: "required" | "preparation" | "coverage";
 };
 
 /** Ab hier läuft der Abend aus – bis dahin muss jemand im Laden bleiben. */
@@ -31,6 +32,8 @@ export const LUNCH_END = 15 * 60;
  * Besetzung eines Ladens ändert, ändert nur diese Liste.
  */
 export type StaffingRule = {
+  /** Compare peak/kitchen staffing, preparation, coverage, preferences in that order. */
+  priority?: "required" | "preparation" | "coverage";
   label: string;
   /** Kurzbeschreibung der Zeitspanne für den Tab „Tài liệu". */
   when: string;
@@ -101,7 +104,7 @@ export function staffingWindows(
 ): StaffingWindow[] {
   return rules.filter((rule) => ruleAppliesOn(rule, weekday) && !(holiday && rule.onHolidays === false)).flatMap((rule) => {
     const range = ruleRange(rule, weekday);
-    return rule.windows(blocks).map((window) => ({ label: rule.label, ...window, ...range, who: rule.who, weight: rule.weight }));
+    return rule.windows(blocks).map((window) => ({ label: rule.label, ...window, ...range, who: rule.who, weight: rule.weight, priority: rule.priority }));
   });
 }
 

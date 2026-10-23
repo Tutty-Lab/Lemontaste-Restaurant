@@ -19,6 +19,7 @@ import { weeksOfMonth } from "../lib/weeks";
 import { employmentShortVi } from "../lib/employment";
 import { monthlyTargetMinutesFor, SCHEDULE_SLOT_MINUTES } from "../lib/contract";
 import { StaffingReport } from "./StaffingReport";
+import { ServiceCoverageReport } from "./ServiceCoverageReport";
 import type { PeakCoverage } from "../lib/analyze";
 import { ruleById, staffingRuleId } from "../lib/rules";
 import { checkShifts } from "../lib/shiftChecks";
@@ -250,6 +251,7 @@ export function ScheduleTab({
       )}
 
       {mode === "schedule" && schedule.shifts.length > 0 && <StaffingReport analysis={store.analysis} />}
+      {mode === "schedule" && schedule.shifts.length > 0 && <ServiceCoverageReport schedule={schedule} />}
 
       {/* Lỗi kiểm tra */}
       {mode === "schedule" && !validation.valid && schedule.shifts.length > 0 && (
@@ -500,6 +502,8 @@ const SHORT_RULE_LABELS: Record<string, string> = {
   "Cao điểm tối": "Đông 18–20",
   "Phục vụ trưa": "Bồi 12–14",
   "Phục vụ tối": "Bồi 18–20",
+  "Bồi chuẩn bị trưa": "Bồi CB 11–12",
+  "Bồi chuẩn bị tối": "Bồi CB 17–18",
   "Bếp": "Có Bếp",
 };
 
@@ -573,15 +577,16 @@ function CoverageRow({
 const GROUP_RANGES = [
   ["open", "11–12", "11:00 – 12:00", 11 * 60, 12 * 60],
   ["noon", "12–14", "12:00 – 14:00 (giờ đông)", 12 * 60, 14 * 60],
-  ["afternoon", "14–18", "14:00 – 18:00 (ít khách 15–17)", 14 * 60, 18 * 60],
+  ["afternoon", "14–17", "14:00 – 17:00 (ít khách 15–17)", 14 * 60, 17 * 60],
+  ["preparation", "17–18", "17:00 – 18:00 (chuẩn bị giờ đông)", 17 * 60, 18 * 60],
   ["evening", "18–20", "18:00 – 20:00 (giờ đông)", 18 * 60, 20 * 60],
   ["evening-end", "20–21½", "20:00 – đóng cửa 21:30", 20 * 60, 21 * 60 + 30],
 ] as const;
 const GROUP_WINDOWS = (["KITCHEN", "SERVICE"] as const).flatMap((group) =>
   GROUP_RANGES.map(([key, range, title, from, to]) => ({
     key: `${group}-${key}`, range, title, group, from, to,
-    // Luật Lemontaste: Bếp suốt giờ mở, Bồi chỉ giờ đông – ngoài đó chỉ để xem, không cảnh báo.
-    need: group === "KITCHEN" || key === "noon" || key === "evening" ? 1 : 0,
+    // Bếp suốt giờ mở; Bồi cả chuẩn bị và cao điểm. Khung khác thiếu vẫn báo vàng.
+    need: group === "KITCHEN" || key === "open" || key === "preparation" || key === "noon" || key === "evening" ? 1 : 0,
   })),
 );
 
