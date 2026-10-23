@@ -9,6 +9,7 @@ import { minutesToDecimalHours, minutesToTime } from "../lib/time";
 import { MONTH_NAMES_DE } from "../lib/dateFormat";
 import { publicHolidayNames } from "../lib/holidays";
 import { format } from "date-fns";
+import { hourStatsFor } from "../lib/surchargeHours";
 import { employmentLabelDe } from "../lib/employment";
 
 // Deutscher Monats-Titel für das offizielle Dokument.
@@ -291,6 +292,70 @@ function Signature({ label }: { label: string }) {
   return (
     <div>
       <div className="border-t border-slate-500 pt-1 mt-8 text-slate-600">{label}</div>
+    </div>
+  );
+}
+
+export function StundenUebersichtPage({
+  schedule,
+  employees,
+  dates,
+  periodLabel,
+}: {
+  schedule: Schedule;
+  employees: readonly Employee[];
+  dates?: string[];
+  periodLabel?: string;
+}) {
+  const days = dates ?? datesOfMonth(schedule.year, schedule.month);
+  const rows = employees.map((employee) => ({ employee, stats: hourStatsFor(schedule.shifts, employee.id, days) }));
+  const sum = rows.reduce(
+    (acc, { stats }) => ({ total: acc.total + stats.total, night: acc.night + stats.night, sunday: acc.sunday + stats.sunday }),
+    { total: 0, night: 0, sunday: 0 },
+  );
+  const num = "px-2 py-1.5 text-right tabular-nums";
+  return (
+    <div className="stundenzettel-page bg-white text-slate-900 mx-auto max-w-[210mm] p-6 text-[12px]">
+      <div className="flex items-start justify-between border-b-2 border-slate-800 pb-2 mb-3">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">Stundenübersicht</h2>
+          <p className="text-slate-600">{schedule.companyName || "—"}</p>
+          {schedule.address && <p className="text-slate-500 text-[11px]">{schedule.address}</p>}
+        </div>
+        <div className="text-right text-slate-600">{periodLabel ?? monthLabelDe(schedule.year, schedule.month)}</div>
+      </div>
+      <table className="w-full text-[12px]">
+        <thead>
+          <tr className="bg-slate-100 border-b border-slate-600">
+            <th className="px-2 py-1.5 text-left font-semibold">Mitarbeiter</th>
+            <th className={`${num} font-semibold`}>Gesamtstunden</th>
+            <th className={`${num} font-semibold`}>Nachtstunden (ab 20 Uhr)</th>
+            <th className={`${num} font-semibold`}>Sonntagsstunden</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ employee, stats }) => (
+            <tr key={employee.id} className="border-b border-slate-200">
+              <td className="px-2 py-1.5">{employee.name}</td>
+              <td className={num}>{minutesToDecimalHours(stats.total)}</td>
+              <td className={num}>{minutesToDecimalHours(stats.night)}</td>
+              <td className={num}>{minutesToDecimalHours(stats.sunday)}</td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr className="border-t border-slate-600 font-semibold">
+            <td className="px-2 py-1.5">Summe</td>
+            <td className={num}>{minutesToDecimalHours(sum.total)}</td>
+            <td className={num}>{minutesToDecimalHours(sum.night)}</td>
+            <td className={num}>{minutesToDecimalHours(sum.sunday)}</td>
+          </tr>
+        </tfoot>
+      </table>
+      <p className="mt-3 text-[10px] text-slate-500">
+        Nachtstunden: bezahlte Arbeitszeit ab 20:00 Uhr (ohne Pause), ohne Sonntage. Sonntagsstunden: gesamte
+        bezahlte Arbeitszeit an Sonntagen (nicht doppelt als Nacht gezählt). Angaben in Stunden.
+      </p>
     </div>
   );
 }

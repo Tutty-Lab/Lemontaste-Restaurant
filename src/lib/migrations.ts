@@ -106,5 +106,10 @@ export function applyMigrations(storeId: string, schedule: Schedule): Schedule {
       : next.employees;
     next = { ...next, employees, migrations: [...done(), MIGRATION_LEMONTASTE_SERVICE] };
   }
+  const dualRoleMigration = "2026-10-23-ngoc-long-both";
+  if (storeId === "lemontaste" && !done().includes(dualRoleMigration)) {
+    next = { ...next, employees: next.employees.map(e => e.id === "lt-ngoc-long" ? { ...e, station: "BOTH" } : e),
+      migrations: [...done(), dualRoleMigration] };
+  }
   return next;
 }

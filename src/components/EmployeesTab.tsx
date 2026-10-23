@@ -22,7 +22,7 @@ const inputClass =
  * Später einfach auf true setzen.
  */
 const ADVANCED_EDITABLE = true;
-const STATION_VI: Record<Station, string> = { SERVICE: "Bồi", KITCHEN: "Bếp" };
+const STATION_VI: Record<Station, string> = { SERVICE: "Bồi", KITCHEN: "Bếp", BOTH: "Cả 2 (Bồi + Bếp)" };
 
 const FIXED_START_DEFAULT = "06:30";
 const FIXED_END_DEFAULT = "14:30";
@@ -67,6 +67,7 @@ type Draft = {
   maxDays: string;
   /** „Ngày nghỉ cố định" – die Kehrseite von availableWeekdays. */
   daysOff: WeekdayKey[];
+  unavailableRanges: { startDate: string; endDate: string }[];
   fixed: boolean;
   fixedStart: string; // "HH:MM"
   fixedEnd: string; // "HH:MM"
@@ -115,6 +116,7 @@ function draftFrom(emp?: Employee, partners: PartnerChoice = {}): Draft {
     })),
     startDate: emp?.startDate ?? "",
     endDate: emp?.endDate ?? "",
+    unavailableRanges: (emp?.unavailableRanges ?? []).map(range => ({ ...range })),
     partners,
   };
 }
@@ -166,6 +168,7 @@ function draftToEmployee(d: Draft): Omit<Employee, "id"> {
     name: d.name.trim() || "Nhân viên mới",
     employmentType: d.employmentType,
     station: d.station,
+    unavailableRanges: d.unavailableRanges.filter(range => range.startDate && range.endDate && range.startDate <= range.endDate),
     // Monatsvertrag: die Stunden stehen direkt im Soll. Wochenvertrag: das
     // Monats-Soll wird je Monat daraus abgeleitet (contract.ts).
     targetMinutes: salaryMode ? (validSalary ? salaryToMinutes(amount, rate) : 0) : d.unit === "month" ? Math.round(hours * 60) : 0,
@@ -640,6 +643,7 @@ function EmployeeSheet({
                 options={[
                   { value: "SERVICE", label: "Bồi" },
                   { value: "KITCHEN", label: "Bếp" },
+                  { value: "BOTH", label: "Cả 2 (Bồi + Bếp)" },
                 ]}
               />
             </div>
@@ -753,7 +757,7 @@ function EmployeeSheet({
                     </div>
                     <CheckRow
                       label="Rải đều trong tháng"
-                      note="Giờ đã chia đều theo tuần sẵn; có Độ dài ca thì ưu tiên nhiều ca ngắn hơn."
+                      note="Có Độ dài ca thì ưu tiên nhiều ca ngắn hơn, trong những ngày có thể làm."
                       checked={d.spreadEvenly}
                       onChange={(v) => set("spreadEvenly", v)}
                     />
@@ -884,6 +888,25 @@ function EmployeeSheet({
                     </SheetSection>
                   )}
 
+                  <SheetSection title="Nghỉ theo khoảng ngày">
+                    <p className="text-xs text-slate-500">Không xếp ca trong khoảng nghỉ (gồm cả hai ngày). Giữ đủ định mức tháng trong những ngày còn lại.</p>
+                    {d.unavailableRanges.map((range, index) => (
+                      <div key={index} className="flex gap-2 items-end">
+                        {(["startDate", "endDate"] as const).map(key => (
+                          <label key={key} className="block min-w-0 flex-1">
+                            <FieldLabel>{key === "startDate" ? "Nghỉ từ ngày" : "Đến hết ngày"}</FieldLabel>
+                            <input type="date" className={`${inputClass} w-full min-w-0`} value={range[key]}
+                              min={key === "endDate" ? range.startDate || undefined : undefined}
+                              max={key === "startDate" ? range.endDate || undefined : undefined}
+                              onChange={event => set("unavailableRanges", d.unavailableRanges.map((r, i) => i === index ? { ...r, [key]: event.target.value } : r))} />
+                          </label>
+                        ))}
+                        <button type="button" className="text-sm text-red-600 pb-2" onClick={() => set("unavailableRanges", d.unavailableRanges.filter((_, i) => i !== index))}>Xoá</button>
+                      </div>
+                    ))}
+                    <button type="button" className="text-sm underline" onClick={() => set("unavailableRanges", [...d.unavailableRanges, { startDate: "", endDate: "" }])}>+ Thêm khoảng nghỉ</button>
+                  </SheetSection>
+
                   <SheetSection title="Thời gian làm việc">
                     {!showPeriod ? (
                       <button
@@ -927,7 +950,7 @@ function EmployeeSheet({
                     )}
                     {showPeriod && (
                       <p className="text-xs text-slate-400">
-                        Bỏ trống = làm từ đầu tháng / vẫn đang làm. Ngày ngoài khoảng này không xếp ca và không tính định mức.
+                        Bỏ trống = làm từ đầu tháng / vẫn đang làm. Ngày ngoài khoảng này không xếp ca. Hợp đồng tháng vẫn giữ đủ giờ tháng; giờ được dồn vào các ngày có thể làm.
                       </p>
                     )}
                   </SheetSection>
@@ -974,7 +997,7 @@ function EmployeeSheet({
               </button>
               <button
                 onClick={() => onSave(draftToEmployee(d), d.partners)}
-                disabled={d.name.trim().length === 0 || salaryBad}
+                disabled={d.name.trim().length === 0 || salaryBad || d.unavailableRanges.some(range => Boolean(range.startDate || range.endDate) && (!range.startDate || !range.endDate || range.startDate > range.endDate))}
                 className="rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-40"
               >
                 Lưu

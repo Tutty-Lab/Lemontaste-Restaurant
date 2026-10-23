@@ -22,7 +22,7 @@ import {
   type OverrideMap,
   type WorkHoursConfig,
 } from "./workHours";
-import { coveragePoints, staffingWindows, weightedDailyTargets, workingAt, type StaffingRule } from "./staffing";
+import { staffAt, coveragePoints, staffingWindows, weightedDailyTargets, type StaffingRule } from "./staffing";
 import { weekStartOf } from "./weeks";
 import { mayWorkOn } from "./availability";
 
@@ -139,9 +139,8 @@ export function analyzeSchedule(input: AnalyzeInput): ScheduleAnalysis {
         const from = peak.startMinutes;
         const to = peak.endMinutes;
         const who = peak.who;
-        const pool = who ? available.filter((shift) => { const e = employeesById.get(shift.employeeId); return e ? who(e) : false; }) : available;
-        const points = coveragePoints(pool, from, to).slice(0, -1);
-        const counts = points.map((minute) => new Set(pool.filter((shift) => workingAt(shift, minute)).map((shift) => shift.employeeId)).size);
+        const points = coveragePoints(available, from, to).slice(0, -1);
+        const counts = points.map((minute) => staffAt(available, employeesById, minute).filter(e => !who || who(e)).length);
         const minStaff = counts.length ? Math.min(...counts) : 0;
         const maxStaff = counts.length ? Math.max(...counts) : 0;
         peaks.push({

@@ -4,7 +4,7 @@ import { generateSchedule } from "../scheduler";
 import { datesOfMonth } from "../demand";
 import { publicHolidays } from "../holidays";
 import { resolveDay } from "../workHours";
-import { workingAt } from "../staffing";
+import { workingAt, staffAt } from "../staffing";
 import { staffingWindows, clip } from "../staffing";
 import { serviceCoverage } from "../serviceCoverage";
 import { validateSchedule } from "../validation";
@@ -12,24 +12,28 @@ import { validateSchedule } from "../validation";
 describe("Lemontaste preparation and service coverage", () => {
   it("reduces preparation and all-day gaps without sacrificing peak or kitchen coverage", () => {
     const store = STORES[0];
-    const schedule = { ...initialScheduleFor(store), year: 2026, month: 10 };
+    const base = initialScheduleFor(store);
+    // Preserve the original single-role regression fixture; dual-role behavior
+    // is checked separately, since it adds 120 h of service-capable capacity.
+    const schedule = { ...base, year: 2026, month: 10, employees: base.employees.map(e =>
+      e.id === "lt-ngoc-long" ? { ...e, station: "KITCHEN" as const } : e) };
     const shifts = generateSchedule({ ...schedule, rules: store.staffingRules,
       weights: store.dayWeights, demandProfile: store.demandProfile, storeTag: store.id });
-    const serviceIds = new Set(schedule.employees.filter(e => e.station !== "KITCHEN").map(e => e.id));
     let gaps = 0, preparation = 0, peaks = 0, overlap = 0, kitchen = 0;
     for (const date of datesOfMonth(2026, 10)) {
       const day = resolveDay(schedule.workHours, date, publicHolidays(2026), {});
       if (day.closed) continue;
       for (const block of day.blocks) for (let t = block.startMinutes; t < block.endMinutes; t += 30) {
         const present = shifts.filter(s => s.date === date && workingAt(s, t));
-        const count = present.filter(s => serviceIds.has(s.employeeId)).length;
+        const assigned = staffAt(present, new Map(schedule.employees.map(e => [e.id, e])), t);
+        const count = assigned.filter(e => e.station !== "KITCHEN").length;
         if (!count) {
           gaps += .5;
           if (t < 720 || (t >= 1020 && t < 1080)) preparation += .5;
           if ((t >= 720 && t < 840) || (t >= 1080 && t < 1200)) peaks += .5;
         }
         overlap += Math.max(0, count - 1) * .5;
-        if (!present.some(s => !serviceIds.has(s.employeeId))) kitchen += .5;
+        if (!assigned.some(e => e.station === "KITCHEN")) kitchen += .5;
       }
     }
     console.log({ gaps, preparation, peaks, overlap, kitchen });
@@ -43,7 +47,7 @@ describe("Lemontaste preparation and service coverage", () => {
     }
     expect(peaks).toBe(0);
     expect(kitchen).toBe(0);
-    expect(shifts.reduce((n, s) => n + s.paidMinutes, 0)).toBe(722 * 60);
+    expect(shifts.reduce((n, s) => n + s.paidMinutes, 0)).toBe(schedule.employees.reduce((sum, e) => sum + Math.floor(e.targetMinutes / 30) * 30, 0));
     expect(validateSchedule(schedule.employees, shifts, 2026).errors.filter(e => e.severity !== "warning")).toEqual([]);
   }, 120_000);
 

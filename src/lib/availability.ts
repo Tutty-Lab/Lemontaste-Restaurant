@@ -47,5 +47,6 @@ export function isEmployedOn(employee: Employee, isoDate: string): boolean {
  * oder ein Austritt davor sprechen dagegen)
  */
 export function mayWorkOn(employee: Employee, isoDate: string): boolean {
-  return worksOnWeekday(employee, isoDate) && isEmployedOn(employee, isoDate);
+  return worksOnWeekday(employee, isoDate) && isEmployedOn(employee, isoDate) &&
+    !employee.unavailableRanges?.some(range => isoDate >= range.startDate && isoDate <= range.endDate);
 }

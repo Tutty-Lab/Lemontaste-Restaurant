@@ -14,7 +14,7 @@ import type { DateOverride, DayWindow, WorkHoursConfig } from "./lib/workHours";
 export type EmploymentType = "VOLLZEIT" | "TEILZEIT" | "MINIJOB";
 
 /** Bộ phận: Bồi (Service) oder Bếp (Küche). Nur Anzeige – der Planer nutzt es (noch) nicht. */
-export type Station = "SERVICE" | "KITCHEN";
+export type Station = "SERVICE" | "KITCHEN" | "BOTH";
 
 export type ShiftType = "EARLY" | "LATE" | "CUSTOM";
 
@@ -29,7 +29,7 @@ export type Employee = {
   id: string;
   name: string;
   employmentType: EmploymentType;
-  /** Bồi oder Bếp. Fehlt = Bồi (ältere Daten). */
+  /** Bồi, Bếp oder flexibel beide. Fehlt = Bồi (ältere Daten). */
   station?: Station;
   /**
    * Monatliches Soll in Minuten (Integer). 176 h => 10560.
@@ -89,6 +89,8 @@ export type Employee = {
    * Sechs-Tage-Regel begrenzt.
    */
   maxDaysPerWeek?: number;
+  /** Inclusive leave dates; monthly quota stays unchanged. */
+  unavailableRanges?: { startDate: string; endDate: string }[];
   /**
    * Muss diese Person an FEIERTAGEN im Dienst sein?
    *

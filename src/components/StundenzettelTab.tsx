@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { UseScheduleReturn } from "../hooks/useSchedule";
 import type { Employee } from "../types";
-import { StundenzettelPage } from "./StundenzettelPage";
+import { StundenUebersichtPage, StundenzettelPage } from "./StundenzettelPage";
 import { FitToWidth } from "./FitToWidth";
 import type { SchedulePrintLayout } from "./SchedulePrintPage";
 import {
@@ -492,6 +492,11 @@ export function StundenzettelTab({
       {/* Ganze A4-Seite sichtbar: auf die Breite verkleinert statt seitlich scrollen. */}
       {mode === "timesheet" && (
         <div className="space-y-4">
+          {previewEmployees.length > 0 && (
+            <div className="rounded-lg border border-slate-300 shadow-sm bg-white">
+              <FitToWidth><StundenUebersichtPage schedule={previewStore.schedule} employees={previewEmployees} /></FitToWidth>
+            </div>
+          )}
           {previewEmployees.map((employee) => (
             <div key={employee.id} className="rounded-lg border border-slate-300 shadow-sm bg-white">
               <FitToWidth>

@@ -2,7 +2,7 @@ import type { Schedule } from "../types";
 import { datesOfMonth } from "./demand";
 import { publicHolidays } from "./holidays";
 import { resolveDay } from "./workHours";
-import { coveragePoints, workingAt } from "./staffing";
+import { coveragePoints, staffAt } from "./staffing";
 import { monthlyTargetMinutesFor } from "./contract";
 import { mayWorkOn } from "./availability";
 
@@ -12,19 +12,17 @@ export function serviceCoverage(schedule: Schedule) {
   const days = datesOfMonth(schedule.year, schedule.month).map(date => ({ date,
     ...resolveDay(schedule.workHours, date, holidays, overrides) })).filter(day => !day.closed);
   const employees = schedule.employees.filter(e => e.station !== "KITCHEN");
-  const ids = new Set(employees.map(e => e.id));
-  const shifts = schedule.shifts.filter(s => ids.has(s.employeeId));
   let openMinutes = 0, emptyMinutes = 0, overlapMinutes = 0;
   const gaps: { date: string; start: number; end: number; unavailable: boolean }[] = [];
   for (const day of days) for (const block of day.blocks) {
-    const onDay = shifts.filter(s => s.date === day.date);
+    const onDay = schedule.shifts.filter(s => s.date === day.date);
     const points = [...new Set([...coveragePoints(onDay, block.startMinutes, block.endMinutes),
       ...employees.flatMap(e => [e.shiftWindow?.startMinutes, e.shiftWindow?.endMinutes,
         e.fixedShift?.startMinutes, e.fixedShift?.endMinutes]).filter((t): t is number =>
           t != null && t > block.startMinutes && t < block.endMinutes)])].sort((a, b) => a - b);
     for (let i = 0; i < points.length - 1; i++) {
       const start = points[i], end = points[i + 1], duration = end - start;
-      const count = onDay.filter(s => workingAt(s, start)).length;
+      const count = staffAt(onDay, new Map(schedule.employees.map(e => [e.id, e])), start).filter(e => e.station !== "KITCHEN").length;
       openMinutes += duration;
       overlapMinutes += Math.max(0, count - 1) * duration;
       if (count) continue;

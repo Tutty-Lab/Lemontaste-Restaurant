@@ -10,7 +10,7 @@ import {
 import { minutesToShortHours, minutesToTime } from "../lib/time";
 import { signedHours } from "../lib/dateFormat";
 import { isDayClosed, resolveDay } from "../lib/workHours";
-import { workingAt } from "../lib/staffing";
+import { staffAt } from "../lib/staffing";
 import { publicHolidays } from "../lib/holidays";
 import { ShiftCellEditor } from "./ShiftCellEditor";
 import { ScheduleDayView } from "./ScheduleDayView";
@@ -173,7 +173,7 @@ export function ScheduleTab({
         let min: number | null = null;
         for (const block of day.blocks) {
           for (let t = Math.max(w.from, block.startMinutes); t + 30 <= Math.min(w.to, block.endMinutes); t += 30) {
-            const count = dayShifts.filter((s) => groupById.get(s.employeeId) === w.group && workingAt(s, t)).length;
+            const count = staffAt(dayShifts, new Map(schedule.employees.map(e => [e.id, e])), t).filter(e => (e.station === "KITCHEN" ? "KITCHEN" : "SERVICE") === w.group).length;
             min = min == null ? count : Math.min(min, count);
           }
         }

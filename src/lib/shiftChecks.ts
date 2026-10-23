@@ -45,6 +45,7 @@ export function checkShifts(schedule: Schedule): Map<string, ShiftIssue[]> {
       if (!worksOnWeekday(emp, date)) add(emp, date, { hard: true, text: `Không làm ${WEEKDAY_LABELS_VI[wd]}` });
       if (!isEmployedOn(emp, date)) add(emp, date, { hard: true, text: "Ngoài thời gian hợp đồng" });
 
+      if (emp.unavailableRanges?.some(range => date >= range.startDate && date <= range.endDate)) add(emp, date, { hard: true, text: "Trong khoảng nghỉ đã đăng ký" });
       const day = resolveDay(schedule.workHours, date, holidays, overrides);
       const paid = list.reduce((a, s) => a + s.paidMinutes, 0);
       for (const s of list) {

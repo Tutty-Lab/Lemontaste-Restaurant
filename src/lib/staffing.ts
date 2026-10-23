@@ -211,6 +211,16 @@ export function workingAt(shift: Shift, minute: number): boolean {
     !(validPause(shift) && minute >= shift.pauseStartMinutes! && minute < shift.pauseStartMinutes! + shift.pauseMinutes);
 }
 
+/** Assign flexible staff to service when another cook is working; otherwise
+ * keep one flexible employee in the kitchen. Never count one person twice. */
+export function staffAt(shifts: Shift[], employees: Map<string, Employee>, minute: number): Employee[] {
+  const present = [...new Set(shifts.filter(s => workingAt(s, minute)).map(s => s.employeeId))]
+    .map(id => employees.get(id)).filter((e): e is Employee => !!e);
+  const flexible = present.filter(e => e.station === "BOTH").sort((a, b) => a.id.localeCompare(b.id));
+  const cook = present.some(e => e.station === "KITCHEN") ? undefined : flexible[0]?.id;
+  return present.map(e => e.station === "BOTH" ? { ...e, station: e.id === cook ? "KITCHEN" : "SERVICE" } : e);
+}
+
 export function coveragePoints(shifts: Shift[], from: number, to: number): number[] {
   return [...new Set([from, to, ...shifts.flatMap((s) => [s.startMinutes, s.endMinutes,
     ...(validPause(s) ? [s.pauseStartMinutes!, s.pauseStartMinutes! + s.pauseMinutes] : []),

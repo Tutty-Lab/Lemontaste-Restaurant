@@ -1,7 +1,7 @@
 // ============================================================================
 // Eintritt mitten im Monat (startDate):
 //   - Tage vor dem Startdatum werden nicht verplant.
-//   - Sie zählen nicht ins Monats-Soll -> keine falsche „zu wenig geplant"-Warnung.
+//   - Monatsverträge behalten ihr volles Soll innerhalb der verfügbaren Tage.
 // ============================================================================
 
 import { describe, expect, it } from "vitest";
@@ -77,15 +77,14 @@ describe("Eintritt mitten im Monat (startDate)", () => {
 });
 
 describe("Austritt mitten im Monat (endDate)", () => {
-  it("kürzt Wochen- und Monatsvertrag um die Tage nach dem Austritt", () => {
+  it("kürzt nur den Wochenvertrag; der Monatsvertrag behält sein Soll", () => {
     const openDates = openDatesOf(2026, 9);
     const weekly = wk("w", 39);
     const weeklyOut = wk("w-out", 39, { endDate: "2026-09-15" });
     expect(monthlyTargetMinutesFor(weeklyOut, openDates)).toBeLessThan(monthlyTargetMinutesFor(weekly, openDates));
     // Monatsvertrag: anteilig über die offenen Tage bis einschliesslich Austritt.
     const monthly: Employee = { id: "m", name: "m", employmentType: "VOLLZEIT", targetMinutes: 160 * 60, endDate: "2026-09-15" };
-    const bis = openDates.filter((d) => d <= "2026-09-15").length;
-    const erwartet = Math.round((160 * 60 * bis) / openDates.length / 30) * 30;
+    const erwartet = 160 * 60;
     expect(monthlyTargetMinutesFor(monthly, openDates)).toBe(erwartet);
   });
 
@@ -93,7 +92,7 @@ describe("Austritt mitten im Monat (endDate)", () => {
     const base = initialScheduleFor(storeById("shin"));
     const ym = `${base.year}-${String(base.month).padStart(2, "0")}`;
     const employees = base.employees.map((employee: Employee, index: number) =>
-      index === 1 ? { ...employee, endDate: `${ym}-14` } : employee,
+      index === 1 ? { ...employee, targetMinutes: 43 * 60, endDate: `${ym}-14` } : employee,
     );
     const openDates = openDatesOf(base.year, base.month);
     const shifts = generateSchedule({ year: base.year, month: base.month, workHours: base.workHours, employees });

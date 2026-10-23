@@ -26,6 +26,7 @@ import {
   WEEKDAY_SHORT_DE,
   weekdayKeyOf,
 } from "./demand";
+import { hourStatsFor } from "./surchargeHours";
 import { minutesToDecimalHours, minutesToTime } from "./time";
 import { MONTH_NAMES_DE } from "./dateFormat";
 import { employmentLabelDe } from "./employment";
@@ -573,8 +574,10 @@ export async function buildStundenzettelPdfFor(
   for (const job of jobs) {
     const dates = opts.dates ?? datesOfMonth(job.schedule.year, job.schedule.month);
     const periodLabel = opts.periodLabel ?? monthLabelDe(job.schedule.year, job.schedule.month);
+    if (job !== jobs[0]) doc.addPage();
+    drawUebersicht(doc, job.schedule, job.employees, dates, periodLabel);
     for (const employee of job.employees) {
-      if (done > 0) doc.addPage();
+      doc.addPage();
       drawParameterblatt(doc, job.schedule, employee, periodLabel);
       doc.addPage();
       drawStundenzettel(doc, job.schedule, employee, dates, periodLabel);
@@ -588,6 +591,72 @@ export async function buildStundenzettelPdfFor(
   }
 
   return doc;
+}
+
+function drawUebersicht(
+  doc: jsPDF,
+  schedule: Schedule,
+  employees: Employee[],
+  dates: string[],
+  periodLabel: string,
+): void {
+  const pageW = doc.internal.pageSize.getWidth();
+  let y = drawHeader(doc, "Stundenübersicht", schedule, periodLabel) + 2;
+  const left = MARGIN;
+  const right = pageW - MARGIN;
+  const numW = 46;
+  const cols = [
+    { label: "Mitarbeiter", x: left, align: "left" as const },
+    { label: "Gesamtstunden", x: right - 2 * numW, align: "right" as const },
+    { label: "Nachtstunden (ab 20 Uhr)", x: right - numW, align: "right" as const },
+    { label: "Sonntagsstunden", x: right, align: "right" as const },
+  ];
+  const rowH = 6.5;
+  const line = (yy: number, color = DIVIDER, width = 0.2) => {
+    doc.setDrawColor(...color);
+    doc.setLineWidth(width);
+    doc.line(left, yy, right, yy);
+  };
+  const cell = (text: string, col: (typeof cols)[number], yy: number) =>
+    doc.text(T(text), col.align === "right" ? col.x - 1.5 : col.x + 1.5, yy, { align: col.align });
+
+  doc.setFillColor(...HEAD_FILL);
+  doc.rect(left, y, right - left, rowH, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...INK);
+  cols.forEach((col) => cell(col.label, col, y + 4.3));
+  y += rowH;
+  line(y, LINE, 0.3);
+
+  const sum = { total: 0, night: 0, sunday: 0 };
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  for (const employee of employees) {
+    const stats = hourStatsFor(schedule.shifts, employee.id, dates);
+    sum.total += stats.total;
+    sum.night += stats.night;
+    sum.sunday += stats.sunday;
+    cell(employee.name, cols[0], y + 4.3);
+    cell(minutesToDecimalHours(stats.total), cols[1], y + 4.3);
+    cell(minutesToDecimalHours(stats.night), cols[2], y + 4.3);
+    cell(minutesToDecimalHours(stats.sunday), cols[3], y + 4.3);
+    y += rowH;
+    line(y);
+  }
+  line(y, LINE, 0.3);
+  doc.setFont("helvetica", "bold");
+  cell("Summe", cols[0], y + 4.3);
+  cell(minutesToDecimalHours(sum.total), cols[1], y + 4.3);
+  cell(minutesToDecimalHours(sum.night), cols[2], y + 4.3);
+  cell(minutesToDecimalHours(sum.sunday), cols[3], y + 4.3);
+  y += rowH + 4;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...MUTED);
+  const note = "Nachtstunden: bezahlte Arbeitszeit ab 20:00 Uhr (ohne Pause), ohne Sonntage. Sonntagsstunden: gesamte bezahlte Arbeitszeit an Sonntagen (nicht doppelt als Nacht gezählt). Angaben in Stunden.";
+  doc.text(doc.splitTextToSize(T(note), right - left), left, y);
 }
 
 // ── Datei ausliefern ─────────────────────────────────────────────────────────

@@ -126,19 +126,9 @@ function weekPartMinutes(weeklyMinutes: number, week: WeekShare): number {
  * eingetragenen targetMinutes. workHours = Wochenplan des Ladens (Standard:
  * Vorgabe), damit Anzeige, Prüfung und Scheduler dieselbe Zahl rechnen.
  */
-/**
- * MONATSvertrag anteilig, wenn jemand mitten im Monat kommt oder geht: wer am
- * 15. anfängt oder aufhört, schuldet in diesem Monat nur den Anteil der offenen
- * Tage, an denen er beschäftigt ist. Auf die halbe Stunde gerundet, damit der
- * Planer die Zahl exakt treffen kann.
- */
-function proratedMonthly(emp: Employee, openDates: readonly string[]): number {
-  if (emp.startDate == null && emp.endDate == null) return emp.targetMinutes;
-  if (openDates.length === 0) return emp.targetMinutes;
-  const beschaeftigt = openDates.filter((date) => isEmployedOn(emp, date)).length;
-  if (beschaeftigt >= openDates.length) return emp.targetMinutes;
-  const anteil = (emp.targetMinutes * beschaeftigt) / openDates.length;
-  return Math.max(0, Math.round(anteil / SCHEDULE_SLOT_MINUTES) * SCHEDULE_SLOT_MINUTES);
+/** Monthly contracts keep their full quota across the eligible part of a month. */
+function monthlyQuota(emp: Employee, openDates: readonly string[]): number {
+  return openDates.length === 0 || openDates.some(date => isEmployedOn(emp, date)) ? emp.targetMinutes : 0;
 }
 
 export function monthlyTargetMinutesFor(
@@ -146,7 +136,7 @@ export function monthlyTargetMinutesFor(
   openDates: readonly string[],
   workHours: WorkHoursConfig = DEFAULT_WORK_HOURS,
 ): number {
-  if (emp.weeklyHours == null) return proratedMonthly(emp, openDates);
+  if (emp.weeklyHours == null) return monthlyQuota(emp, openDates);
   const weekly = emp.weeklyHours * 60;
   return Math.max(0, Math.round(weekSharesFor(emp, openDates, workHours).reduce((sum, week) => sum + weekPartMinutes(weekly, week), 0)));
 }
