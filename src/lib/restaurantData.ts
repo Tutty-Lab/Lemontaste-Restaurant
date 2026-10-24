@@ -42,5 +42,7 @@ export function lemontasteEmployees(): Employee[] {
     staff("lt-dinh-bien", "Dinh Bien Nguyen", 43, 603),
     staff("lt-moi-a", "Thai Hung Nguyen", 14.39, 200),
     staff("lt-moi-b", "Tran Dinh Hoang", 150, 2550, 5),
-  ].map((e) => ({ ...e, ...LEMONTASTE_PATCHES[e.id] }));
+  ].map((e) => ({ ...e, ...LEMONTASTE_PATCHES[e.id] })).concat(restaurantOwner());
 }
+
+export const restaurantOwner = (): Employee => ({ id: "lt-owner", name: "Chủ quán", employmentType: "VOLLZEIT", station: "BOTH", targetMinutes: 0, ownerSupport: true });

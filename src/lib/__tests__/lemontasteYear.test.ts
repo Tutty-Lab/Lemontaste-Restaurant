@@ -8,7 +8,7 @@ import { datesOfMonth } from "../demand";
 
 const results:{month:number;seconds:number;report:ReturnType<typeof staffingDiagnostics>}[]=[];
 for(let month=1;month<=12;month++) it(`Lemontaste 2026/${month}: quotas, rest, breaks and real coverage`,()=>{
-  const store=STORES[0], base={...initialScheduleFor(store),year:2026,month};
+  const store=STORES[0], base={...withoutOwner(store),year:2026,month};
   const start=performance.now();
   const shifts=generateSchedule({...base,rules:store.staffingRules,weights:store.dayWeights,demandProfile:store.demandProfile,storeTag:store.id});
   const seconds=(performance.now()-start)/1000, report=staffingDiagnostics({...base,shifts});
@@ -41,3 +41,5 @@ afterAll(()=>{
     ...results.filter(r=>r.report.serviceGap||r.report.kitchenGap).map(({month,report:r})=>`## Tháng ${month}\n\n${r.conclusions.join("\n\n")}\n\n${r.adjustments.join("\n\n")}\n\n${r.gaps.map(g=>`- ${g.date} ${Math.floor(g.start/60)}:${String(g.start%60).padStart(2,"0")}–${Math.floor(g.end/60)}:${String(g.end%60).padStart(2,"0")}: ${g.required?"THIẾU BẮT BUỘC":"cho phép trống"} ${g.station==="SERVICE"?"Bồi":"Bếp"}.`).join("\n")}`),""
   ].join("\n"));
 });
+
+function withoutOwner(store: typeof STORES[number]) { const s=initialScheduleFor(store); return {...s,employees:s.employees.filter(e=>!e.ownerSupport)}; }

@@ -1,3 +1,4 @@
+import { restaurantOwner } from "./restaurantData";
 // ============================================================================
 // Einmalige Datenänderungen am GESPEICHERTEN Stand (LocalStorage und Supabase).
 //
@@ -110,6 +111,11 @@ export function applyMigrations(storeId: string, schedule: Schedule): Schedule {
   if (storeId === "lemontaste" && !done().includes(dualRoleMigration)) {
     next = { ...next, employees: next.employees.map(e => e.id === "lt-ngoc-long" ? { ...e, station: "BOTH" } : e),
       migrations: [...done(), dualRoleMigration] };
+  }
+  const ownerMigration = "2026-10-25-owner-support";
+  if (storeId === "lemontaste" && !done().includes(ownerMigration)) {
+    next = { ...next, employees: next.employees.some(e => e.ownerSupport) ? next.employees : [...next.employees, restaurantOwner()],
+      migrations: [...done(), ownerMigration] };
   }
   return next;
 }

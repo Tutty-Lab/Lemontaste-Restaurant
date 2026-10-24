@@ -13,7 +13,7 @@ import { validateSchedule } from "../validation";
 describe("Lemontaste preparation and service coverage", () => {
   it("reduces preparation and all-day gaps without sacrificing peak or kitchen coverage", () => {
     const store = STORES[0];
-    const base = initialScheduleFor(store);
+    const base = withoutOwner(store);
     // Preserve the original single-role regression fixture; dual-role behavior
     // is checked separately, since it adds 120 h of service-capable capacity.
     const schedule = { ...base, year: 2026, month: 10, employees: base.employees.map(e =>
@@ -59,7 +59,7 @@ describe("Lemontaste preparation and service coverage", () => {
   });
 
   it("keeps required coverage ahead of arbitrarily expensive soft preferences and does not cache old rules", () => {
-    const base = { ...initialScheduleFor(STORES[0]), year: 2026, month: 10 };
+    const base = { ...withoutOwner(STORES[0]), year: 2026, month: 10 };
     const employee = { ...base.employees[0], id: "only", targetMinutes: 180,
       shiftHours: undefined, preferredWindows: [{ days: ["thursday" as const], startMinutes: 1080, endMinutes: 1260 }] };
     const overrides = Object.fromEntries(datesOfMonth(2026, 10).filter(d => d !== "2026-10-01").map(d => [d, { date: d, closed: true }]));
@@ -71,7 +71,7 @@ describe("Lemontaste preparation and service coverage", () => {
   });
 
   it("counts pauses and closed days, distinguishes a budget bound from actual gaps", () => {
-    const base = { ...initialScheduleFor(STORES[0]), year: 2026, month: 10 };
+    const base = { ...withoutOwner(STORES[0]), year: 2026, month: 10 };
     const e = { ...base.employees[0], station: "SERVICE" as const, targetMinutes: 480 };
     const dateOverrides = datesOfMonth(2026, 10).filter(d => d !== "2026-10-01").map(date => ({ date, closed: true }));
     const report = serviceCoverage({ ...base, employees: [e], dateOverrides, shifts: [{
@@ -84,3 +84,5 @@ describe("Lemontaste preparation and service coverage", () => {
     expect(report.gaps.map(g => [g.start, g.end, g.required])).toEqual([[900, 930, false], [1170, 1200, true], [1200, 1290, false]]);
   });
 });
+
+function withoutOwner(store: typeof STORES[number]) { const s=initialScheduleFor(store); return {...s,employees:s.employees.filter(e=>!e.ownerSupport)}; }

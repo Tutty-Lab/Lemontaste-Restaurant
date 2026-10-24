@@ -216,7 +216,7 @@ export function workingAt(shift: Shift, minute: number): boolean {
 export function staffAt(shifts: Shift[], employees: Map<string, Employee>, minute: number): Employee[] {
   const present = [...new Set(shifts.filter(s => workingAt(s, minute)).map(s => s.employeeId))]
     .map(id => employees.get(id)).filter((e): e is Employee => !!e);
-  return assignStations(present);
+  return assignStations([...present, ...[...employees.values()].filter(e => e.ownerSupport && !present.some(p => p.id === e.id))]);
 }
 
 /** Shared role resolution for reports and the scheduler's cached slot masks. */

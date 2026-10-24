@@ -214,7 +214,7 @@ export function useSchedule(storeId: string) {
    * leere Seite im Stundenzettel. Im Tab „Nhân viên" bleiben alle sichtbar.
    */
   const activeEmployees = useMemo(
-    () => schedule.employees.filter((employee) => openDates.some((date) => isEmployedOn(employee, date))),
+    () => schedule.employees.filter((employee) => !employee.ownerSupport && openDates.some((date) => isEmployedOn(employee, date))),
     [schedule.employees, openDates],
   );
 

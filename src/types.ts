@@ -29,6 +29,8 @@ export type Employee = {
   id: string;
   name: string;
   employmentType: EmploymentType;
+  /** Owner supports one station throughout opening hours, outside paid contracts. */
+  ownerSupport?: boolean;
   /** Bồi, Bếp oder flexibel beide. Fehlt = Bồi (ältere Daten). */
   station?: Station;
   /**

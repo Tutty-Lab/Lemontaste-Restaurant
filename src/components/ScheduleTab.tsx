@@ -189,6 +189,7 @@ export function ScheduleTab({
 
   return (
     <section>
+      {schedule.employees.some(e => e.ownerSupport) && <p className="mb-3 rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-900">Chủ quán có mặt suốt giờ mở cửa mỗi ngày; hỗ trợ Bồi hoặc Bếp, mỗi lúc một vị trí. Không tính vào giờ hợp đồng hay bảng chấm công.</p>}
       {/* Alles Sichtbare liegt im no-print-Block; beim Drucken bleibt nur der
           Druckbereich ganz unten übrig. */}
       <div className="no-print">
@@ -404,6 +405,26 @@ export function ScheduleTab({
                   </tr>
                 );
               })}
+              {schedule.employees.filter(emp => emp.ownerSupport).map(owner => (
+                <tr key={owner.id} className="bg-sky-50 text-sky-900">
+                  <td className="sticky left-0 z-10 border-b border-r border-slate-200 bg-sky-50 px-1.5 py-1 font-medium w-[80px] max-w-[80px] truncate"
+                    title={`${owner.name} · Bồi/Bếp, mỗi lúc một vị trí · không tính giờ hợp đồng`}>
+                    {owner.name}
+                  </td>
+                  {gridDates.map(date => {
+                    const override = overridesByDate.get(date);
+                    const day = resolveDay(schedule.workHours, date, publicHolidays(schedule.year),
+                      override ? { [date]: override } : {});
+                    return <td key={date} className="border-b border-l border-slate-200 px-0.5 py-1 text-center text-[10px] font-medium whitespace-nowrap"
+                      title={day.closed ? "Quán đóng cửa" : "Chủ có mặt suốt giờ mở; hỗ trợ Bồi hoặc Bếp, không tính giờ lương"}>
+                      {day.closed ? "–" : day.blocks.map((block, index) => <div key={index}>
+                        {shortTime(block.startMinutes)}–{shortTime(block.endMinutes)}
+                      </div>)}
+                    </td>;
+                  })}
+                  <td colSpan={2} className="border-b border-l border-slate-200 px-2 py-1 text-center text-[10px]">Không tính lương</td>
+                </tr>
+              ))}
             </tbody>
             <tfoot>
               <SummaryRow label="Số nhân viên" dates={gridDates} value={(d) => String(dayStats.get(d)!.people.size)} />

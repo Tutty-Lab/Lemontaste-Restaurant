@@ -36,6 +36,7 @@ const WEEKDAY_ORDER: WeekdayKey[] = [
  */
 type Draft = {
   name: string;
+  ownerSupport: boolean;
   employmentType: EmploymentType;
   station: Station;
   /** Monthly hours as editable text; decimal commas are allowed. */
@@ -75,6 +76,7 @@ export function draftFrom(emp?: Employee, partners: PartnerChoice = {}, monthlyM
   const available = emp?.availableWeekdays;
   return {
     name: emp?.name ?? "",
+    ownerSupport: emp?.ownerSupport ?? false,
     employmentType: emp?.employmentType ?? "VOLLZEIT",
     station: emp?.station ?? "SERVICE",
     hours: emp ? hoursText(Math.round(((monthlyMinutes ?? emp.targetMinutes) / 60) * 100) / 100) : "169",
@@ -149,10 +151,11 @@ export function draftToEmployee(d: Draft): Omit<Employee, "id"> {
   return {
     name: d.name.trim() || "Nhân viên mới",
     employmentType: d.employmentType,
+    ownerSupport: d.ownerSupport || undefined,
     station: d.station,
     quotaSource: "hours",
     unavailableRanges: d.unavailableRanges.filter(range => range.startDate && range.endDate && range.startDate <= range.endDate),
-    targetMinutes: Math.round(hours * 60),
+    targetMinutes: d.ownerSupport ? 0 : Math.round(hours * 60),
     monthlySalary: Number.isFinite(amount) && amount >= 0 && d.monthlySalary.trim() !== "" ? amount : undefined,
     hourlyRate: Number.isFinite(rate) && rate > 0 ? rate : undefined,
     weeklyHours: undefined,
@@ -249,7 +252,8 @@ export function EmployeesTab({ store, allStores }: { store: UseScheduleReturn; a
           {schedule.employees.map((emp) => (
             <li key={emp.id}>
               <button
-                onClick={() => setOffen(emp.id)}
+                onClick={() => { if (!emp.ownerSupport) setOffen(emp.id); }}
+                aria-disabled={emp.ownerSupport || undefined}
                 className="w-full text-left rounded-lg border border-slate-200 p-3 flex items-center gap-3 hover:bg-slate-50 active:bg-slate-100 transition-colors"
               >
                 <EmployeeSummaryRow
@@ -258,7 +262,7 @@ export function EmployeesTab({ store, allStores }: { store: UseScheduleReturn; a
                   workHours={schedule.workHours}
                   sharedWith={partnerLabel(emp)}
                 />
-                <span className="text-slate-300 text-lg leading-none">›</span>
+                {!emp.ownerSupport && <span className="text-slate-300 text-lg leading-none">›</span>}
               </button>
             </li>
           ))}
@@ -342,7 +346,7 @@ function EmployeeSummaryRow({
       </div>
       <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
         <span>
-          {emp.weeklyHours != null
+          {emp.ownerSupport ? "Chủ quán · suốt giờ mở · không tính giờ hợp đồng" : emp.weeklyHours != null
             ? `${emp.weeklyHours}h/tuần`
             : `${String(Math.round((emp.targetMinutes / 60) * 100) / 100).replace(".", ",")}h/tháng`}{" "}
           {emp.weeklyHours != null && monatH > 0 ? ` · tháng này ${minutesToShortHours(monatMin)}` : ""}
@@ -633,6 +637,7 @@ function EmployeeSheet({
                 <HoursInput value={d.hourlyRate} onChange={v => set("hourlyRate", v)} placeholder="13,90" unit="€/h" />
               </label>
             </div>
+            {d.ownerSupport && <p className="text-sm text-slate-600">Chủ quán hỗ trợ suốt giờ mở cửa mỗi ngày, mỗi lúc một vị trí Bồi hoặc Bếp. Không tính giờ hợp đồng.</p>}
             <label className="block">
               <FieldLabel>Giờ / tháng</FieldLabel>
               <HoursInput value={d.hours} onChange={v => set("hours", v)} placeholder="VD 169" />

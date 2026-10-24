@@ -72,11 +72,12 @@ export function staffingDiagnostics(schedule:Schedule) {
   const pureService=employees.filter(e=>e.role==="Bồi").reduce((sum,e)=>sum+Math.min(e.target,e.capacity),0);
   const pureKitchen=employees.filter(e=>e.role==="Bếp").reduce((sum,e)=>sum+Math.min(e.target,e.capacity),0);
   const flexible=employees.filter(e=>e.role==="Cả 2").reduce((sum,e)=>sum+Math.min(e.target,e.capacity),0);
-  const minimumExtra=Math.max(0,2*requiredMinutes-budget,requiredMinutes-pureKitchen-flexible,requiredMinutes-pureService-flexible);
+  const ownerCapacity=schedule.employees.filter(e=>e.ownerSupport).length*requiredMinutes;
+  const minimumExtra=Math.max(0,2*requiredMinutes-budget-ownerCapacity,requiredMinutes-pureKitchen-flexible-ownerCapacity,requiredMinutes-pureService-flexible-ownerCapacity);
   const conclusions:string[]=[];
   if(minimumExtra) conclusions.push(`Thiếu ngân sách ít nhất ${hours(minimumExtra)} để có 1 Bồi + 1 Bếp trong khung bắt buộc 11–14h, 17–20h. Đây là cận dưới, còn giới hạn ngày và ca.`);
-  if(requiredMinutes>pureKitchen+flexible) conclusions.push(`Bếp thiếu ít nhất ${hours(requiredMinutes-pureKitchen-flexible)}: tăng giờ người có thể làm Bếp hoặc bổ sung Bếp.`);
-  if(requiredMinutes>pureService+flexible) conclusions.push(`Bồi thiếu ít nhất ${hours(requiredMinutes-pureService-flexible)}: tăng giờ người có thể làm Bồi hoặc bổ sung Bồi.`);
+  if(requiredMinutes>pureKitchen+flexible+ownerCapacity) conclusions.push(`Bếp thiếu ít nhất ${hours(requiredMinutes-pureKitchen-flexible-ownerCapacity)}: tăng giờ người có thể làm Bếp hoặc bổ sung Bếp.`);
+  if(requiredMinutes>pureService+flexible+ownerCapacity) conclusions.push(`Bồi thiếu ít nhất ${hours(requiredMinutes-pureService-flexible-ownerCapacity)}: tăng giờ người có thể làm Bồi hoặc bổ sung Bồi.`);
   if(!minimumExtra&&(requiredServiceGap||requiredKitchenGap)) conclusions.push("Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ.");
   if(!requiredServiceGap&&!requiredKitchenGap) conclusions.push("Đã phủ ít nhất 1 Bồi và 1 Bếp liên tục 11–14h, 17–20h. Khung 14–17h và sau 20h cho phép còn trống.");
   const adjustments=minimumExtra ? employees.filter(e=>e.target>0 && e.capacity>e.target)

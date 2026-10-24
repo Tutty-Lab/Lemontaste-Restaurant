@@ -5,10 +5,10 @@ import { resolveDay } from "../workHours";
 import { generateSchedule } from "../scheduler";
 
 describe("Lemontaste", () => {
-  it("has the owner's 8 employees for 10/2026: 723,39 h and 12.487 € Brutto", () => {
+  it("has the owner's 8 employees plus owner for 10/2026: 723,39 h and 12.487 € Brutto", () => {
     expect(STORES.map(s => s.id)).toEqual(["lemontaste"]);
     const employees = STORES[0].sampleEmployees();
-    expect(employees).toHaveLength(8);
+    expect(employees).toHaveLength(9);
     expect(employees.reduce((a, e) => a + e.targetMinutes, 0)).toBe((120 + 174 + 93 + 43 + 86 + 43 + 150) * 60 + Math.round(14.39 * 60));
     expect(employees.reduce((a, e) => a + (e.monthlySalary ?? 0), 0)).toBe(12487);
     expect(employees.find(e => e.name === "Tran Dinh Hoang")?.maxDaysPerWeek).toBe(5);

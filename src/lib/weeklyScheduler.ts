@@ -315,6 +315,10 @@ function calculateDayCost(shifts: Shift[], blocks: DayBlocks, weekday: WeekdayKe
     const previous = byEmployee.get(employee.id);
     byEmployee.set(employee.id, { employee, mask: previous ? mask.map((v, i) => v || previous.mask[i]) : mask });
   }
+  for (const employee of ctx.employeesById.values()) if (employee.ownerSupport && !byEmployee.has(employee.id)) {
+    byEmployee.set(employee.id, { employee, mask: model.minutes.map(() => 1) });
+    for (let i = 0; i < counts.length; i++) counts[i]++;
+  }
   const members = [...byEmployee.values()];
   const assigned = model.minutes.map((_, i) => {
     // At most 30 employees fit the bitmask; larger teams keep the general path.
@@ -1080,7 +1084,7 @@ export function generateWeeklySchedule(input: WeeklyInput, existing: Shift[] = [
   result = improveCoverage(result, employees, days, holidays, dailyTargets, ctx);
   } else {
       result = generateWeeklySchedule({ ...input,
-        employees: input.employees.map(e => e.station === "BOTH" ? { ...e, station: "SERVICE" as const } : e),
+        employees: input.employees.map(e => e.station === "BOTH" && !e.ownerSupport ? { ...e, station: "SERVICE" as const } : e),
         rules: ctx.rules.map(rule => rule.priority ? { ...rule, priority: "required" as const } : rule),
       }, existing);
   }

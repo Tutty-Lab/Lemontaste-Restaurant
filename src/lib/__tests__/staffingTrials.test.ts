@@ -13,7 +13,7 @@ const changes:[string,string,Partial<Employee>][]=[
  ["Tran Dinh Hoang: tối đa 6 thay vì 5 ngày/tuần, giữ 150h", "lt-moi-b",{maxDaysPerWeek:6}],
 ];
 for(const [name,id,patch] of changes) it(`September trial: ${name}`,()=>{
- const store=STORES[0], initial=initialScheduleFor(store);
+ const store=STORES[0], initial=withoutOwner(store);
  const base={...initial,year:2026,month:9,employees:initial.employees.map(e=>e.id===id?{...e,...patch}:e)};
  const shifts=generateSchedule({...base,rules:store.staffingRules,weights:store.dayWeights,demandProfile:store.demandProfile,storeTag:store.id});
  const report=staffingDiagnostics({...base,shifts});
@@ -37,3 +37,5 @@ afterAll(()=>{
  "Kết quả chỉ xác nhận cho tháng và cấu hình đã thử. Cần khách đồng ý trước khi đổi ngày nghỉ/khung giờ. Không kết luận cấu hình gốc bất khả thi chỉ từ khoảng trống thuật toán.",""
  ].join("\n"));
 });
+
+function withoutOwner(store: typeof STORES[number]) { const s=initialScheduleFor(store); return {...s,employees:s.employees.filter(e=>!e.ownerSupport)}; }
