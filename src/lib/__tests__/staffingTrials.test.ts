@@ -22,8 +22,8 @@ for(const [name,id,patch] of changes) it(`September trial: ${name}`,()=>{
  expect(validateSchedule(base.employees,shifts,2026).errors.filter(e=>e.severity!=="warning")).toEqual([]);
  expect(report.employees.every(e=>e.unassigned===0)).toBe(true);
  if(id==="lt-moi-b") {
-  expect(report.serviceGap).toBe(0);
-  expect(report.kitchenGap).toBe(0);
+  expect(report.requiredServiceGap).toBe(0);
+  expect(report.requiredKitchenGap).toBe(0);
  }
 },60000);
 afterAll(()=>{
@@ -31,7 +31,7 @@ afterAll(()=>{
  mkdirSync("reports",{recursive:true});
  writeFileSync("reports/staffing-adjustments.md",[
  "# Phương án đã thử cho khách xác nhận","",
- "Tháng 9/2026, dữ liệu mặc định: lịch gốc còn 4h trống Bồi, 0h trống Bếp. Mỗi dòng dưới chỉ đổi một người; giữ nguyên tổng giờ hợp đồng. Các thử nghiệm không lưu vào dữ liệu khách.","",
+ "Tháng 9/2026, theo luật mới: bắt buộc 11–14h, 17–20h; các khung còn lại cho phép trống. Mỗi dòng dưới chỉ đổi một người; giữ nguyên tổng giờ hợp đồng. Các thử nghiệm không lưu vào dữ liệu khách. Bảng ghi khoảng trống cả ngày, gồm khung cho phép trống. Dữ liệu mặc định đã kín hai khung bắt buộc, không cần áp dụng các thay đổi này để đạt luật mới.","",
  "| Điều chỉnh | Trống Bồi sau thử (h) | Trống Bếp sau thử (h) |","|---|---:|---:|",
  ...trials.map(t=>`| ${t.name} | ${t.gap} | ${t.kitchen} |`),"",
  "Kết quả chỉ xác nhận cho tháng và cấu hình đã thử. Cần khách đồng ý trước khi đổi ngày nghỉ/khung giờ. Không kết luận cấu hình gốc bất khả thi chỉ từ khoảng trống thuật toán.",""

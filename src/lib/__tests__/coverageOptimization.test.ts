@@ -1,3 +1,4 @@
+import { isRequiredCoverage } from "../coveragePolicy";
 import { describe, expect, it } from "vitest";
 import { STORES, initialScheduleFor } from "../stores";
 import { generateSchedule } from "../scheduler";
@@ -19,7 +20,7 @@ describe("Lemontaste preparation and service coverage", () => {
       e.id === "lt-ngoc-long" ? { ...e, station: "KITCHEN" as const } : e) };
     const shifts = generateSchedule({ ...schedule, rules: store.staffingRules,
       weights: store.dayWeights, demandProfile: store.demandProfile, storeTag: store.id });
-    let gaps = 0, preparation = 0, peaks = 0, overlap = 0, kitchen = 0;
+    let gaps = 0, preparation = 0, peaks = 0, overlap = 0, kitchen = 0, requiredKitchen = 0;
     for (const date of datesOfMonth(2026, 10)) {
       const day = resolveDay(schedule.workHours, date, publicHolidays(2026), {});
       if (day.closed) continue;
@@ -33,11 +34,11 @@ describe("Lemontaste preparation and service coverage", () => {
           if ((t >= 720 && t < 840) || (t >= 1080 && t < 1200)) peaks += .5;
         }
         overlap += Math.max(0, count - 1) * .5;
-        if (!assigned.some(e => e.station === "KITCHEN")) kitchen += .5;
+        if (!assigned.some(e => e.station === "KITCHEN")) { kitchen += .5; if(isRequiredCoverage(t)) requiredKitchen += .5; }
       }
     }
     console.log({ gaps, preparation, peaks, overlap, kitchen });
-    expect(preparation).toBeLessThan(14);
+    expect(preparation).toBe(0);
     expect(gaps).toBeLessThan(59.5);
     expect(overlap).toBeLessThan(7);
     for (const employee of schedule.employees) {
@@ -46,14 +47,14 @@ describe("Lemontaste preparation and service coverage", () => {
       expect(new Set(own.map(s => s.date)).size).toBe(own.length);
     }
     expect(peaks).toBe(0);
-    expect(kitchen).toBe(0);
+    expect(requiredKitchen).toBe(0);
     expect(shifts.reduce((n, s) => n + s.paidMinutes, 0)).toBe(schedule.employees.reduce((sum, e) => sum + Math.floor(e.targetMinutes / 30) * 30, 0));
     expect(validateSchedule(schedule.employees, shifts, 2026).errors.filter(e => e.severity !== "warning")).toEqual([]);
   }, 120_000);
 
-  it("requires both preparation windows, clips them to actual opening times", () => {
+  it("requires continuous core windows for both roles, clips to actual opening times", () => {
     const windows = staffingWindows([{ startMinutes: 690, endMinutes: 1050 }], "monday", STORES[0].staffingRules);
-    expect(windows.filter(w => w.priority === "preparation").map(w => [w.startMinutes, w.endMinutes])).toEqual([[690, 720], [1020, 1050]]);
+    expect(windows.filter(w => w.priority === "required").map(w => [w.startMinutes, w.endMinutes])).toEqual([[690, 840], [1020, 1050], [690, 840], [1020, 1050]]);
     expect(staffingWindows([], "monday", STORES[0].staffingRules)).toEqual([]);
   });
 
@@ -79,6 +80,7 @@ describe("Lemontaste preparation and service coverage", () => {
     expect(report.openMinutes).toBe(630);
     expect(report.emptyMinutes).toBe(150);
     expect(report.budgetLowerBound).toBe(150);
-    expect(report.gaps.map(g => [g.start, g.end])).toEqual([[900, 930], [1170, 1290]]);
+    expect(report.requiredEmptyMinutes).toBe(30);
+    expect(report.gaps.map(g => [g.start, g.end, g.required])).toEqual([[900, 930, false], [1170, 1200, true], [1200, 1290, false]]);
   });
 });

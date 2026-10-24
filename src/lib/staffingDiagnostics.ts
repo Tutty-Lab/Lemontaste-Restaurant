@@ -1,3 +1,4 @@
+import { coverageBoundaries, isRequiredCoverage } from "./coveragePolicy";
 import type { Employee, Schedule } from "../types";
 import { datesOfMonth, WEEKDAY_SHORT_VI, type WeekdayKey } from "./demand";
 import { publicHolidays } from "./holidays";
@@ -18,21 +19,24 @@ export function staffingDiagnostics(schedule:Schedule) {
   const holidays=publicHolidays(schedule.year), overrides=Object.fromEntries(schedule.dateOverrides.map(d=>[d.date,d]));
   const days=datesOfMonth(schedule.year,schedule.month).map(date=>({date,...resolveDay(schedule.workHours,date,holidays,overrides)})).filter(d=>!d.closed);
   const dates=days.map(d=>d.date), byId=new Map(schedule.employees.map(e=>[e.id,e]));
-  let openMinutes=0, serviceGap=0, kitchenGap=0;
+  let openMinutes=0, requiredMinutes=0, serviceGap=0, kitchenGap=0, requiredServiceGap=0, requiredKitchenGap=0;
   const roles=new Map(schedule.employees.map(e=>[e.id,{service:0,kitchen:0}]));
-  const gaps:{date:string;start:number;end:number;station:"SERVICE"|"KITCHEN";blockedNames:string[]}[]=[];
+  const gaps:{date:string;start:number;end:number;station:"SERVICE"|"KITCHEN";required:boolean;blockedNames:string[]}[]=[];
   for(const day of days) for(const block of day.blocks) {
     const shifts=schedule.shifts.filter(s=>s.date===day.date);
-    const points=coveragePoints(shifts,block.startMinutes,block.endMinutes);
+    const points=[...new Set([...coveragePoints(shifts,block.startMinutes,block.endMinutes), ...coverageBoundaries(block.startMinutes,block.endMinutes)])].sort((a,b)=>a-b);
     for(let i=0;i<points.length-1;i++) {
       const start=points[i],end=points[i+1],duration=end-start;
       openMinutes+=duration;
+      const required=isRequiredCoverage(start);
+      if(required) requiredMinutes+=duration;
       const present=staffAt(shifts,byId,start);
       for(const e of present) roles.get(e.id)![e.station==="KITCHEN"?"kitchen":"service"]+=duration;
       for(const station of ["SERVICE","KITCHEN"] as const) if(!present.some(e=>(e.station??"SERVICE")===station)) {
-        if(station==="SERVICE") serviceGap+=duration; else kitchenGap+=duration;
+        if(station==="SERVICE") { serviceGap+=duration; if(required) requiredServiceGap+=duration; }
+        else { kitchenGap+=duration; if(required) requiredKitchenGap+=duration; }
         const eligible=schedule.employees.filter(e=>e.station===station||e.station==="BOTH"||(station==="SERVICE"&&!e.station));
-        gaps.push({date:day.date,start,end,station,blockedNames:eligible.filter(e=>{
+        gaps.push({date:day.date,start,end,station,required,blockedNames:eligible.filter(e=>{
           const w=e.fixedShift??e.shiftWindow;
           return !mayWorkOn(e,day.date)||!!w&&(w.startMinutes>start||w.endMinutes<end);
         }).map(e=>e.name)});
@@ -68,15 +72,15 @@ export function staffingDiagnostics(schedule:Schedule) {
   const pureService=employees.filter(e=>e.role==="Bồi").reduce((sum,e)=>sum+Math.min(e.target,e.capacity),0);
   const pureKitchen=employees.filter(e=>e.role==="Bếp").reduce((sum,e)=>sum+Math.min(e.target,e.capacity),0);
   const flexible=employees.filter(e=>e.role==="Cả 2").reduce((sum,e)=>sum+Math.min(e.target,e.capacity),0);
-  const minimumExtra=Math.max(0,2*openMinutes-budget,openMinutes-pureKitchen-flexible,openMinutes-pureService-flexible);
+  const minimumExtra=Math.max(0,2*requiredMinutes-budget,requiredMinutes-pureKitchen-flexible,requiredMinutes-pureService-flexible);
   const conclusions:string[]=[];
-  if(minimumExtra) conclusions.push(`Thiếu ngân sách ít nhất ${hours(minimumExtra)} để có 1 Bồi + 1 Bếp suốt giờ mở. Đây là cận dưới, còn giới hạn ngày và ca.`);
-  if(openMinutes>pureKitchen+flexible) conclusions.push(`Bếp thiếu ít nhất ${hours(openMinutes-pureKitchen-flexible)}: tăng giờ người có thể làm Bếp hoặc bổ sung Bếp.`);
-  if(openMinutes>pureService+flexible) conclusions.push(`Bồi thiếu ít nhất ${hours(openMinutes-pureService-flexible)}: tăng giờ người có thể làm Bồi hoặc bổ sung Bồi.`);
-  if(!minimumExtra&&(serviceGap||kitchenGap)) conclusions.push("Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ.");
-  if(!serviceGap&&!kitchenGap) conclusions.push("Đã phủ ít nhất 1 Bồi và 1 Bếp suốt giờ mở cửa.");
+  if(minimumExtra) conclusions.push(`Thiếu ngân sách ít nhất ${hours(minimumExtra)} để có 1 Bồi + 1 Bếp trong khung bắt buộc 11–14h, 17–20h. Đây là cận dưới, còn giới hạn ngày và ca.`);
+  if(requiredMinutes>pureKitchen+flexible) conclusions.push(`Bếp thiếu ít nhất ${hours(requiredMinutes-pureKitchen-flexible)}: tăng giờ người có thể làm Bếp hoặc bổ sung Bếp.`);
+  if(requiredMinutes>pureService+flexible) conclusions.push(`Bồi thiếu ít nhất ${hours(requiredMinutes-pureService-flexible)}: tăng giờ người có thể làm Bồi hoặc bổ sung Bồi.`);
+  if(!minimumExtra&&(requiredServiceGap||requiredKitchenGap)) conclusions.push("Tổng ngân sách chưa chứng minh thiếu người. Lịch còn khoảng trống; cần tối ưu tiếp hoặc kiểm tra các giới hạn bên dưới, chưa thể kết luận phải tăng giờ.");
+  if(!requiredServiceGap&&!requiredKitchenGap) conclusions.push("Đã phủ ít nhất 1 Bồi và 1 Bếp liên tục 11–14h, 17–20h. Khung 14–17h và sau 20h cho phép còn trống.");
   const adjustments=minimumExtra ? employees.filter(e=>e.target>0 && e.capacity>e.target)
     .sort((a,b)=>Number(b.role==="Cả 2")-Number(a.role==="Cả 2")||(b.capacity-b.target)-(a.capacity-a.target)).slice(0,3)
     .map(e=>`${e.name} (${e.role}): phương án tăng ${hours(Math.min(minimumExtra,e.capacity-e.target))}, từ ${hours(e.target)} lên ${hours(e.target+Math.min(minimumExtra,e.capacity-e.target))}. Đây là lựa chọn thay thế, phải tạo lại để kiểm chứng độ phủ.`) : [];
-  return {openMinutes,budget,minimumExtra,serviceGap,kitchenGap,gaps,employees,conclusions,adjustments};
+  return {openMinutes,requiredMinutes,budget,minimumExtra,serviceGap,kitchenGap,requiredServiceGap,requiredKitchenGap,gaps,employees,conclusions,adjustments};
 }

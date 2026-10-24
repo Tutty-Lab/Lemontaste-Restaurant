@@ -1,3 +1,4 @@
+import { REQUIRED_COVERAGE } from "./coveragePolicy";
 // Lemontaste: một quán.
 
 import type { Employee, Schedule } from "../types";
@@ -6,7 +7,7 @@ import { type DemandBand, type StaffingRule } from "./staffing";
 import { DEFAULT_WORK_HOURS } from "./workHours";
 import { lemontasteEmployees } from "./restaurantData";
 import { clip } from "./staffing";
-import type { WorkHoursConfig } from "./workHours";
+import type { DayBlocks, WorkHoursConfig } from "./workHours";
 
 export type StoreConfig = {
   /** Schlüssel der Zeile in store_data – nach dem Anlegen NICHT mehr ändern. */
@@ -35,50 +36,34 @@ const lemontasteHours: WorkHoursConfig = {
   closedWeekdays: { monday: false, tuesday: false, wednesday: false, thursday: false,
     friday: false, saturday: false, sunday: false },
 };
-// Chưa có số người yêu cầu mỗi ca: tối thiểu một người, cao điểm tối thiểu hai.
+// Cover both stations in the mandatory windows before optional opening hours.
+const coreWindows = (blocks: DayBlocks) =>
+  REQUIRED_COVERAGE.flatMap(w => clip(w.startMinutes, w.endMinutes)(blocks));
 const rules: readonly StaffingRule[] = [
-  { priority: "required", label: "Trong giờ mở cửa", when: "11:00–21:30", minStaff: 1, maxStaff: Infinity,
-    scaled: false, windows: blocks => blocks },
-  { priority: "required", label: "Cao điểm trưa", when: "12:00–14:00", minStaff: 2, maxStaff: Infinity,
-    scaled: false, windows: clip(720, 840) },
-  { priority: "required", label: "Cao điểm tối", when: "18:00–20:00", minStaff: 2, maxStaff: Infinity,
-    scaled: false, windows: clip(1080, 1200) },
-  // Chủ quán (10/2026): luôn có ít nhất 1 Bếp suốt giờ mở cửa.
-  { priority: "required", label: "Bếp", when: "11:00–21:30", minStaff: 1, maxStaff: Infinity,
-    scaled: false, who: (e: Employee) => e.station === "KITCHEN", windows: blocks => blocks },
-  // Cao điểm trước, rồi chuẩn bị; phần thiếu vẫn là vi phạm phải hiển thị.
-  { priority: "required", label: "Phục vụ trưa", when: "12:00–14:00", minStaff: 1, maxStaff: Infinity,
-    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: clip(720, 840) },
-  { priority: "required", label: "Phục vụ tối", when: "18:00–20:00", minStaff: 1, maxStaff: Infinity,
-    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: clip(1080, 1200) },
-  { priority: "preparation", label: "Bồi chuẩn bị trưa", when: "11:00–12:00", minStaff: 1, maxStaff: Infinity,
-    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: clip(660, 720) },
-  { priority: "preparation", label: "Bồi chuẩn bị tối", when: "17:00–18:00", minStaff: 1, maxStaff: Infinity,
-    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: clip(1020, 1080) },
-  // Luật mềm (chủ, 10/2026): dàn Bồi ra cho không trùng nhau, ưu tiên phủ 11–12 và
-  // 20–21:30. Không đủ giờ Bồi để phủ cả ngày: luật mềm, thiếu thì cảnh báo vàng.
-  { label: "Bồi mở/đóng", when: "11:00–12:00, 20:00–21:30", minStaff: 1, maxStaff: Infinity,
-    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", weight: 120,
-    windows: blocks => [...clip(660, 720)(blocks), ...clip(1200, 1290)(blocks)] },
-  { priority: "coverage", label: "Bồi rải đều", when: "11:00–21:30", minStaff: 1, maxStaff: Infinity,
-    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", weight: 40,
-    windows: blocks => blocks },
+  { priority: "required", label: "Bếp bắt buộc", when: "11:00–14:00, 17:00–20:00", minStaff: 1, maxStaff: Infinity,
+    scaled: false, who: (e: Employee) => e.station === "KITCHEN", windows: coreWindows },
+  { priority: "required", label: "Bồi bắt buộc", when: "11:00–14:00, 17:00–20:00", minStaff: 1, maxStaff: Infinity,
+    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: coreWindows },
+  { priority: "coverage", label: "Bếp bổ sung", when: "14:00–17:00, 20:00–21:30", minStaff: 1, maxStaff: Infinity,
+    scaled: false, who: (e: Employee) => e.station === "KITCHEN",
+    windows: blocks => [...clip(840, 1020)(blocks), ...clip(1200, 1290)(blocks)] },
+  { priority: "coverage", label: "Bồi bổ sung", when: "14:00–17:00, 20:00–21:30", minStaff: 1, maxStaff: Infinity,
+    scaled: false, who: (e: Employee) => e.station !== "KITCHEN",
+    windows: blocks => [...clip(840, 1020)(blocks), ...clip(1200, 1290)(blocks)] },
 ];
 export const STORES: StoreConfig[] = [
   { id: "lemontaste", name: "Lemontaste", shortName: "Lemontaste",
     address: "", sampleEmployees: lemontasteEmployees,
     workHours: lemontasteHours, staffingRules: rules,
     demandProfile: [
-      { startMinutes: 660, endMinutes: 720, level: 1, label: "Mở cửa" },
-      { startMinutes: 720, endMinutes: 840, level: 1.8, label: "Cao điểm trưa" },
+      { startMinutes: 660, endMinutes: 840, level: 1.8, label: "Cao điểm trưa và chuẩn bị" },
       { startMinutes: 840, endMinutes: 900, level: 1, label: "Sau trưa" },
       { startMinutes: 900, endMinutes: 1020, level: 0.6, label: "Ít khách" },
-      { startMinutes: 1020, endMinutes: 1080, level: 1, label: "Mở tối" },
-      { startMinutes: 1080, endMinutes: 1200, level: 1.8, label: "Cao điểm tối" },
+      { startMinutes: 1020, endMinutes: 1200, level: 1.8, label: "Cao điểm tối và chuẩn bị" },
       { startMinutes: 1200, endMinutes: 1290, level: 0.8, label: "Cuối ca" },
     ],
     dayWeights: { monday: 1, tuesday: 1, wednesday: 1, thursday: 1, friday: 1, saturday: 1.5, sunday: 1.5 },
-    notes: "Mở 11:00–21:30. Cao điểm 12:00–14:00, 18:00–20:00; Bồi và Bếp có mặt chuẩn bị từ 11:00 và 17:00. Ưu tiên có Bồi suốt giờ mở; ít khách 15:00–17:00. Đông thứ 7, CN. Pause 30 phút. Vollzeit 6 giờ/ngày. Không tính Nacht-/Sonntagszuschlag." },
+    notes: "Mở 11:00–21:30. Bắt buộc có Bồi và Bếp liên tục 11:00–14:00, 17:00–20:00. Khung 14:00–17:00 và sau 20:00 cho phép thiếu; còn giờ thì phủ thêm. Đông thứ 7, CN. Pause 30 phút. Vollzeit 6 giờ/ngày. Không tính Nacht-/Sonntagszuschlag." },
 ];
 
 export const DEFAULT_STORE_ID = STORES[0].id;

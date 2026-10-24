@@ -649,19 +649,23 @@ function repairMonthlyCoverage(result: Shift[], employees: Employee[], days: Map
     if (shift.pauseMinutes) shift.pauseStartMinutes = pick(pauseStartCandidates(shift.startMinutes, shift.endMinutes, shift.pauseMinutes));
     return shift;
   };
-  for (let step = 0; step < 24000 && eligible.length; step++) {
-    const missingDates = [...scores].filter(([,cost]) => cost[0] > 0 || cost[1] > 0 || cost[2] > 0).map(([date]) => date);
+  for (let step = 0; eligible.length && (step < 24000 || (step < 48000 && bestCost[0] > 0)); step++) {
+    const priority = [0, 1, 2].find(index => [...scores.values()].some(cost => cost[index] > 0));
+    const missingDates = priority == null ? [] : [...scores].filter(([,cost]) => cost[priority] > 0).map(([date]) => date);
     const targetDate = missingDates.length && random() < .7 ? pick(missingDates) : pick(dates);
-    const employee = pick(eligible), own = state.filter(s => s.employeeId === employee.id);
+    const candidates = priority === 0 ? eligible.filter(e => mayWorkOn(e, targetDate) && !ctx.blocked.get(e.id)?.has(targetDate)) : eligible;
+    if (!candidates.length) continue;
+    const employee = pick(candidates), own = state.filter(s => s.employeeId === employee.id);
     if (!own.length) continue;
-    const a = pick(own), mode = random();
+    const mode = random(), onTarget = own.find(s => s.date === targetDate);
+    const a = priority === 0 && mode < 0.25 && onTarget ? onTarget : pick(own);
     let removed = [a], added: Shift[] = [];
     if (mode < 0.25) {
       const next = place(employee, a.date, a.paidMinutes);
       if (!next) continue;
       added = [next];
     } else if (mode < 0.65) {
-      const b = pick(own);
+      const b = priority === 0 && onTarget ? onTarget : pick(own);
       if (a.date === b.date) continue;
       const amount = SLOT * (1 + Math.floor(random() * 8));
       const nextA = place(employee, a.date, a.paidMinutes - amount), nextB = place(employee, b.date, b.paidMinutes + amount);
@@ -855,7 +859,7 @@ function improveCoverage(result: Shift[], employees: Employee[], days: Map<strin
       // Move two service shifts together: one-person moves can get stuck when
       // both must move to hand over coverage. Preserve each person's paid time.
       for (const rule of ctx.rules.filter(rule => rule.priority === "coverage" && rule.who)) {
-        const members = employees.filter(employee => !employee.fixedShift && rule.who!(employee) &&
+        const members = employees.filter(employee => !employee.fixedShift && (employee.station === "BOTH" || rule.who!(employee)) &&
           onDay.some(shift => shift.employeeId === employee.id));
         for (let a = 0; a < members.length; a++) for (let b = a + 1; b < members.length; b++) {
           const empA = members[a], empB = members[b];

@@ -1,3 +1,4 @@
+import { isRequiredCoverage } from "../lib/coveragePolicy";
 import { useMemo, useState } from "react";
 import type { UseScheduleReturn } from "../hooks/useSchedule";
 import type { Shift } from "../types";
@@ -564,7 +565,7 @@ function CoverageRow({
             title={`ít nhất ${min}, đông nhất ${max} · luật: ${need}${Number.isFinite(allowed) ? `–${allowed}` : "+"} người`}
           >
             {min === max ? min : `${min}–${max}`}
-            {short && <span className="block text-[10px] leading-none">cần {need}</span>}
+            {short && <span className="block text-[10px] leading-none">{hard ? `cần ${need}` : "cho phép trống"}</span>}
           </td>
         );
       })}
@@ -587,8 +588,7 @@ const GROUP_RANGES = [
 const GROUP_WINDOWS = (["KITCHEN", "SERVICE"] as const).flatMap((group) =>
   GROUP_RANGES.map(([key, range, title, from, to]) => ({
     key: `${group}-${key}`, range, title, group, from, to,
-    // Bếp suốt giờ mở; Bồi cả chuẩn bị và cao điểm. Khung khác thiếu vẫn báo vàng.
-    need: group === "KITCHEN" || key === "open" || key === "preparation" || key === "noon" || key === "evening" ? 1 : 0,
+    need: isRequiredCoverage(from) ? 1 : 0,
   })),
 );
 

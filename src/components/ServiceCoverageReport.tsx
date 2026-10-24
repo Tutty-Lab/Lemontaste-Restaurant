@@ -10,10 +10,9 @@ export function ServiceCoverageReport({ schedule }: { schedule: Schedule }) {
   const report = useMemo(() => serviceCoverage(schedule), [schedule]);
   const diagnosis = useMemo(() => staffingDiagnostics(schedule), [schedule]);
   return <details className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-    <summary className="cursor-pointer font-medium">Bồi: trống {hours(report.emptyMinutes)} · trùng {hours(report.overlapMinutes)} — xem khung giờ thiếu</summary>
-    <p className="mt-2">Mở cửa {hours(report.openMinutes)}; giờ có thể làm Bồi {hours(report.budgetMinutes)}.
-      Chỉ xét tổng giờ, phải trống ít nhất {hours(report.budgetLowerBound)}. Đây là cận dưới, chưa tính ngày nghỉ, khung ca, ca liền và Pause. Giờ của người chọn Cả 2 còn có thể dùng cho Bếp; mỗi thời điểm chỉ tính một vị trí.</p>
-    <p className="mt-1">Mục tiêu: ít nhất 1 Bồi + 1 Bếp suốt giờ mở, giờ dư ưu tiên cao điểm và thứ 7, CN. Chỉ ca liền. Độ dài ca mong muốn là ưu tiên mềm; có thể dùng ca ngắn từ 1 giờ để phủ chỗ thiếu.</p>
+    <summary className="cursor-pointer font-medium">Bồi: thiếu bắt buộc {hours(report.requiredEmptyMinutes)} · trống cho phép {hours(report.emptyMinutes-report.requiredEmptyMinutes)} · trùng {hours(report.overlapMinutes)} — xem khung giờ thiếu</summary>
+    <p className="mt-2">Bắt buộc ít nhất 1 Bồi + 1 Bếp liên tục 11:00–14:00 và 17:00–20:00. Khung 14:00–17:00 và sau 20:00 cho phép thiếu, còn giờ thì phủ thêm. Ngày đông ưu tiên giờ dư; nhân viên chỉ làm cuối tuần được tận dụng trước để người linh hoạt phủ ngày thường.</p>
+    <p className="mt-1">Chỉ ca liền. Độ dài ca mong muốn là ưu tiên mềm. Giờ của người chọn Cả 2 chỉ tính một vị trí mỗi thời điểm.</p>
     <div className="mt-3 space-y-1">{diagnosis.conclusions.map(text=><p key={text}>{text}</p>)}</div>
     {diagnosis.adjustments.length>0&&<ul className="mt-2 list-disc pl-5 text-xs">{diagnosis.adjustments.map(text=><li key={text}>{text}</li>)}</ul>}
     <details className="mt-3">
@@ -29,8 +28,8 @@ export function ServiceCoverageReport({ schedule }: { schedule: Schedule }) {
     </details>
     <ul className="mt-2 max-h-64 list-disc overflow-auto pl-5 text-xs">
       {report.gaps.map(gap => <li key={`${gap.date}-${gap.start}`}>
-        {gap.date.split("-").reverse().join(".")} {minutesToTime(gap.start)}–{minutesToTime(gap.end)}:
-        {gap.unavailable ? " không Bồi nào được phép làm theo ngày/khung ca đã nhập." : " chưa có Bồi; cần xem giới hạn ca, ngày làm và cách xếp."}
+        {gap.required ? "Bắt buộc — " : "Cho phép trống — "}{gap.date.split("-").reverse().join(".")} {minutesToTime(gap.start)}–{minutesToTime(gap.end)}:
+        {gap.unavailable ? " không Bồi nào được phép làm theo ngày/khung ca đã nhập." : gap.required ? " chưa có Bồi; cần xem giới hạn ca, ngày làm và cách xếp." : " chưa có Bồi trong khung tùy chọn."}
       </li>)}
       {!report.gaps.length && <li>Có Bồi suốt giờ mở cửa.</li>}
     </ul>

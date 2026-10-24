@@ -1,3 +1,4 @@
+import { coverageBoundaries, isRequiredCoverage } from "./coveragePolicy";
 import type { Schedule } from "../types";
 import { datesOfMonth } from "./demand";
 import { publicHolidays } from "./holidays";
@@ -12,11 +13,11 @@ export function serviceCoverage(schedule: Schedule) {
   const days = datesOfMonth(schedule.year, schedule.month).map(date => ({ date,
     ...resolveDay(schedule.workHours, date, holidays, overrides) })).filter(day => !day.closed);
   const employees = schedule.employees.filter(e => e.station !== "KITCHEN");
-  let openMinutes = 0, emptyMinutes = 0, overlapMinutes = 0;
-  const gaps: { date: string; start: number; end: number; unavailable: boolean }[] = [];
+  let openMinutes = 0, emptyMinutes = 0, requiredEmptyMinutes = 0, overlapMinutes = 0;
+  const gaps: { date: string; start: number; end: number; required: boolean; unavailable: boolean }[] = [];
   for (const day of days) for (const block of day.blocks) {
     const onDay = schedule.shifts.filter(s => s.date === day.date);
-    const points = [...new Set([...coveragePoints(onDay, block.startMinutes, block.endMinutes),
+    const points = [...new Set([...coveragePoints(onDay, block.startMinutes, block.endMinutes), ...coverageBoundaries(block.startMinutes, block.endMinutes),
       ...employees.flatMap(e => [e.shiftWindow?.startMinutes, e.shiftWindow?.endMinutes,
         e.fixedShift?.startMinutes, e.fixedShift?.endMinutes]).filter((t): t is number =>
           t != null && t > block.startMinutes && t < block.endMinutes)])].sort((a, b) => a - b);
@@ -27,16 +28,18 @@ export function serviceCoverage(schedule: Schedule) {
       overlapMinutes += Math.max(0, count - 1) * duration;
       if (count) continue;
       emptyMinutes += duration;
+      const required = isRequiredCoverage(start);
+      if (required) requiredEmptyMinutes += duration;
       const unavailable = !employees.some(e => {
         const w = e.fixedShift ?? e.shiftWindow;
         return mayWorkOn(e, day.date) && (!w || (w.startMinutes <= start && w.endMinutes >= end));
       });
       const last = gaps[gaps.length - 1];
-      if (last?.date === day.date && last.end === start && last.unavailable === unavailable) last.end = end;
-      else gaps.push({ date: day.date, start, end, unavailable });
+      if (last?.date === day.date && last.end === start && last.unavailable === unavailable && last.required === required) last.end = end;
+      else gaps.push({ date: day.date, start, end, required, unavailable });
     }
   }
   const budgetMinutes = employees.reduce((sum, e) => sum + monthlyTargetMinutesFor(e, days.map(d => d.date), schedule.workHours), 0);
-  return { openMinutes, emptyMinutes, overlapMinutes, budgetMinutes,
+  return { openMinutes, emptyMinutes, requiredEmptyMinutes, overlapMinutes, budgetMinutes,
     budgetLowerBound: Math.max(0, openMinutes - budgetMinutes), gaps };
 }
