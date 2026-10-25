@@ -32,7 +32,6 @@ import { MONTH_NAMES_DE } from "./dateFormat";
 import { employmentLabelDe } from "./employment";
 import { publicHolidayNames, publicHolidays } from "./holidays";
 import { isDayClosed } from "./workHours";
-import { OPERATING_PARAMS } from "./company";
 import { format } from "date-fns";
 
 /** Dateiname säubern: Umlaute/Akzente weg, nur unbedenkliche Zeichen behalten. */
@@ -431,47 +430,6 @@ function drawStundenzettelTable(
   }
 }
 
-function euro(value: number): string {
-  return `${value.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR`;
-}
-
-/** Tờ thông số: steht vor jedem Stundenzettel. */
-function drawParameterblatt(doc: jsPDF, schedule: Schedule, employee: Employee, periodLabel: string): void {
-  let y = drawHeader(doc, "Parameterblatt", schedule, periodLabel);
-  const section = (title: string, pairs: Array<[string, string]>) => {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(...INK);
-    doc.text(T(title), MARGIN, y + 2);
-    y += 8;
-    doc.setFontSize(9);
-    for (const [label, value] of pairs) {
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(...MUTED);
-      doc.text(`${T(label)}:`, MARGIN, y);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(...INK);
-      doc.text(T(value), MARGIN + 48, y);
-      doc.setDrawColor(...DIVIDER);
-      doc.setLineWidth(0.1);
-      doc.line(MARGIN, y + 2, doc.internal.pageSize.getWidth() - MARGIN, y + 2);
-      y += 7;
-    }
-    y += 4;
-  };
-  const hours = employee.targetMinutes / 60;
-  const person: Array<[string, string]> = [
-    ["Mitarbeiter", employee.name],
-    ["Beschäftigungsart", employmentLabelDe(employee.employmentType)],
-    ["Stunden/Monat", `${hours.toLocaleString("de-DE", { maximumFractionDigits: 2 })} h`],
-  ];
-  if (employee.monthlySalary !== undefined) person.push(["Brutto", euro(employee.monthlySalary)]);
-  if (employee.hourlyRate !== undefined) person.push(["Stundenlohn", euro(employee.hourlyRate)]);
-  if (employee.maxDaysPerWeek) person.push(["Arbeitstage", `max. ${employee.maxDaysPerWeek} Tage/Woche`]);
-  section("Mitarbeiter", person);
-  section("Betrieb", OPERATING_PARAMS);
-}
-
 /** Zeichnet EINEN Stundenzettel auf die aktuelle Seite. */
 function drawStundenzettel(
   doc: jsPDF,
@@ -488,7 +446,6 @@ function drawStundenzettel(
       ["Beschäftigungsart", employmentLabelDe(employee.employmentType)],
       ["Mitarbeiter", employee.name],
       ["Monat", MONTH_NAMES_DE[schedule.month - 1]],
-      ["Sollstunden", null], // von Hand einzutragen
       ["Jahr", String(schedule.year)],
     ],
     startY,
@@ -509,8 +466,6 @@ function drawStundenzettel(
 
   const summary: Array<[string, string | null]> = [
     ["Gesamtstunden", null], // vom Chef von Hand einzutragen
-    ["Sollstunden", null],
-    ["Differenz", null],
   ];
   summary.forEach(([label, value], i) => {
     const x = MARGIN + i * col3;
@@ -577,8 +532,6 @@ export async function buildStundenzettelPdfFor(
     if (job !== jobs[0]) doc.addPage();
     drawUebersicht(doc, job.schedule, job.employees, dates, periodLabel);
     for (const employee of job.employees) {
-      doc.addPage();
-      drawParameterblatt(doc, job.schedule, employee, periodLabel);
       doc.addPage();
       drawStundenzettel(doc, job.schedule, employee, dates, periodLabel);
       // Zähler NICHT im optionalen Aufruf hochzählen: ohne onProgress würde
@@ -678,6 +631,7 @@ export function deliver(blob: Blob, filename: string): void {
   a.href = url;
   a.download = filename;
   a.rel = "noopener";
+  a.target = "_blank";
   a.style.display = "none";
   document.body.appendChild(a);
   a.click();

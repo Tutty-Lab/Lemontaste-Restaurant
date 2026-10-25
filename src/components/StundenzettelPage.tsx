@@ -70,12 +70,6 @@ export function StundenzettelPage({
         <Info label="Beschäftigungsart" value={employmentLabelDe(employee.employmentType)} />
         <Info label="Mitarbeiter" value={employee.name} />
         <Info label="Monat" value={MONTH_NAMES_DE[schedule.month - 1]} />
-        {/*
-          Sollstunden bleibt auf dem Zettel bewusst LEER: der Betrieb trägt den
-          Wert von Hand ein (Ausdruck wie PDF). Die geplante Zahl steht in der
-          App (Tab Nhân viên) und gehört nicht auf das Dokument.
-        */}
-        <Info label="Sollstunden" blank />
         <Info label="Jahr" value={String(schedule.year)} />
       </div>
 
@@ -215,23 +209,9 @@ export function StundenzettelPage({
         </tfoot>
       </table>
 
-      {/*
-        Nur die tatsächlich geleisteten Stunden werden gedruckt. Sollstunden und
-        Differenz bleiben leer – sie werden auf dem Papier von Hand ergänzt.
-      */}
-      <div className="mt-3 grid grid-cols-3 gap-4 text-[12px]">
-        <div>
-          <div className="text-slate-500">Gesamtstunden</div>
-          <BlankLine />
-        </div>
-        <div>
-          <div className="text-slate-500">Sollstunden</div>
-          <BlankLine />
-        </div>
-        <div>
-          <div className="text-slate-500">Differenz</div>
-          <BlankLine />
-        </div>
+      <div className="mt-3 text-[12px]">
+        <div className="text-slate-500">Gesamtstunden</div>
+        <BlankLine />
       </div>
 
       <div className="mt-10 grid grid-cols-3 gap-8 text-[11px]">

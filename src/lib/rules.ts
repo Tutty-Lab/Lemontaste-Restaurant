@@ -45,7 +45,7 @@ export const RULES: readonly Rule[] = [
   { id: "fixed-shift", kind: "hard", title: "Ca cố định", detail: "Người có ca cố định chỉ làm đúng khung giờ đó." },
   { id: "holiday-duty", kind: "hard", title: "Trực ngày lễ", detail: "Ngày lễ quán mở thì người trực ngày lễ phải có ca." },
   { id: "contract-hours", kind: "soft", title: "Đủ giờ định mức", detail: "Xếp đủ giờ hợp đồng; tháng không đủ ngày (nghỉ, giới hạn ngày, làm quán khác) thì báo thiếu." },
-  { id: "peak-staff", kind: "soft", title: "Số người giờ cao điểm", detail: "Trưa 11–14h và tối 17–20h, gồm giờ chuẩn bị; giờ dư ưu tiên ngày đông và cân bằng các khung tương đương." },
+  { id: "peak-staff", kind: "soft", title: "Số người giờ cao điểm", detail: "Ưu tiên 2 Bếp vào 12–14h và 18–20h thứ Sáu, thứ Bảy, Chủ nhật; Bồi 11–12h chỉ cần 1 người. Giờ dư ưu tiên ngày đông và cân bằng các khung tương đương." },
   { id: "day-weights", kind: "soft", title: "Ngày đông nhiều giờ hơn", detail: "Ngày đông (hệ số 1,5) và ngày lễ nhận nhiều giờ hơn ngày thường." },
   { id: "own-shift-length", kind: "soft", title: "Độ dài ca riêng", detail: "Mỗi ngày làm nằm trong khoảng giờ đã đặt cho người đó." },
   { id: "spread-evenly", kind: "soft", title: "Rải đều trong tháng", detail: "Hợp đồng tháng phân bổ trên toàn tháng, không khóa vào ngân sách từng tuần. Độ dài ca mong muốn là ưu tiên mềm." },
@@ -57,6 +57,8 @@ export const ruleById = (id: RuleId): Rule => RULES.find((r) => r.id === id)!;
 
 /** Besetzungsregeln (staffing.ts) nach Label: welche hart, welche weich. */
 export function staffingRuleId(label: string): RuleId {
+  if (label === "Bồi chuẩn bị gọn") return "spread-service";
+  if (label === "Bếp ngày đông") return "peak-staff";
   if (label === "Bồi mở/đóng" || label === "Bồi rải đều" || label.endsWith("bổ sung")) return "spread-service";
   return label === "Trưa" || label === "Tối" ? "peak-staff" : "closing";
 }

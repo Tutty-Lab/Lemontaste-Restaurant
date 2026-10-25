@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import type { UseScheduleReturn } from "../hooks/useSchedule";
 import type { Employee } from "../types";
 import { StundenUebersichtPage, StundenzettelPage } from "./StundenzettelPage";
@@ -78,6 +78,25 @@ export function StundenzettelTab({
     () => weeksOfMonth(schedule.year, schedule.month),
     [schedule.year, schedule.month],
   );
+  const [printPeriod, setPrintPeriod] = useState("month");
+  const selectedWeek = weeks.find(w => w.weekStart === printPeriod);
+  const printDates = selectedWeek?.dates;
+  const printLabel = selectedWeek ? `Woche ${selectedWeek.label} · ${monthLabel(schedule.year, schedule.month)}` : undefined;
+  const saveTarget = useRef<{ createWritable(): Promise<{write(blob: Blob): Promise<void>; close(): Promise<void>}> } | null>(null);
+  const chooseSaveTarget = async (filename: string) => {
+    saveTarget.current = null;
+    const picker = (window as unknown as {showSaveFilePicker?: (options: unknown) => Promise<NonNullable<typeof saveTarget.current>>}).showSaveFilePicker;
+    if (!picker) return true;
+    try {
+      saveTarget.current = await picker.call(window, { suggestedName: filename, types: [{description: "PDF", accept: {"application/pdf": [".pdf"]}}] });
+      return true;
+    } catch (error) {
+      if ((error as Error).name === "AbortError") return false;
+      // Embedded browsers may expose the picker but disallow opening it.
+      // Keep the normal download/share path available in that case.
+      return true;
+    }
+  };
 
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfProgress, setPdfProgress] = useState<string>("");
@@ -136,6 +155,14 @@ export function StundenzettelTab({
    * giữ các file lại, mỗi file một nút Lưu / Chia sẻ.
    */
   const finishPdfs = async (files: { blob: Blob; filename: string }[]) => {
+    if (saveTarget.current && files.length === 1) {
+      const handle = saveTarget.current;
+      saveTarget.current = null;
+      const writable = await handle.createWritable();
+      await writable.write(files[0].blob);
+      await writable.close();
+      return;
+    }
     if (inApp.inApp) {
       setReadyPdfs(files);
       return;
@@ -304,10 +331,14 @@ export function StundenzettelTab({
     };
   }
 
-  const onPdfStundenzettel = () => void doPdf(`Stundenzettel_${whoTag}_${monthTag}.pdf`);
-  const onPdfSchedule = () => {
+  const onPdfStundenzettel = async () => {
+    const filename = `Stundenzettel_${whoTag}_${selectedWeek ? `tuan_${selectedWeek.weekStart}` : monthTag}.pdf`;
+    if (await chooseSaveTarget(fileFor(primary, filename))) await doPdf(filename, {dates: printDates, label: printLabel});
+  };
+  const onPdfSchedule = async () => {
     const range = scheduleRangeFor("month");
-    if (range) void doPdfSchedule(range, `Dienstplan_${whoTag}_thang_${monthTag}.pdf`);
+    const filename = `Dienstplan_${whoTag}_thang_${monthTag}.pdf`;
+    if (range && await chooseSaveTarget(fileFor(primary, filename))) await doPdfSchedule(range, filename);
   };
 
   // Vùng in KHÔNG được dọn theo sự kiện "afterprint": trên Android sự kiện đó
@@ -333,6 +364,10 @@ export function StundenzettelTab({
         {toolbarLeft}
         {/* Mobile: eigene volle Zeile, Auswahl dehnt sich; ab sm rechts neben dem Umschalter. */}
         <div className="flex w-full min-w-0 items-center gap-2 sm:ml-auto sm:w-auto">
+          {mode === "timesheet" && <select aria-label="Kỳ chấm công" value={selectedWeek ? printPeriod : "month"} onChange={e => setPrintPeriod(e.target.value)} className="min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm">
+            <option value="month">Cả tháng</option>
+            {weeks.map(w => <option key={w.weekStart} value={w.weekStart}>Tuần {w.label}</option>)}
+          </select>}
           {mode === "timesheet" ? (
             <select
               aria-label="Xem trước"
@@ -356,7 +391,7 @@ export function StundenzettelTab({
             onClick={mode === "timesheet" ? onPdfStundenzettel : onPdfSchedule}
             title={
               mode === "timesheet"
-                ? "Bảng chấm công của cả quán, cả tháng"
+                ? `Bảng chấm công của cả quán, ${selectedWeek ? selectedWeek.label : "cả tháng"}`
                 : "Lịch làm việc của cả quán, cả tháng"
             }
             className="ml-auto shrink-0 rounded-lg bg-slate-900 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-slate-700 active:bg-slate-800 disabled:opacity-40"
@@ -494,13 +529,13 @@ export function StundenzettelTab({
         <div className="space-y-4">
           {previewEmployees.length > 0 && (
             <div className="rounded-lg border border-slate-300 shadow-sm bg-white">
-              <FitToWidth><StundenUebersichtPage schedule={previewStore.schedule} employees={previewEmployees} /></FitToWidth>
+              <FitToWidth><StundenUebersichtPage schedule={previewStore.schedule} employees={previewEmployees} dates={printDates} periodLabel={printLabel} /></FitToWidth>
             </div>
           )}
           {previewEmployees.map((employee) => (
             <div key={employee.id} className="rounded-lg border border-slate-300 shadow-sm bg-white">
               <FitToWidth>
-                <StundenzettelPage schedule={previewStore.schedule} employee={employee} />
+                <StundenzettelPage schedule={previewStore.schedule} employee={employee} dates={printDates} periodLabel={printLabel} />
               </FitToWidth>
             </div>
           ))}

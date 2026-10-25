@@ -1,3 +1,4 @@
+import { busyKitchenTarget } from "./coveragePolicy";
 import type { Employee, Shift } from "../types";
 import { DAY_WEIGHTS, type WeekdayKey } from "./demand";
 import type { DayBlocks, DayWindow } from "./workHours";
@@ -216,14 +217,18 @@ export function workingAt(shift: Shift, minute: number): boolean {
 export function staffAt(shifts: Shift[], employees: Map<string, Employee>, minute: number): Employee[] {
   const present = [...new Set(shifts.filter(s => workingAt(s, minute)).map(s => s.employeeId))]
     .map(id => employees.get(id)).filter((e): e is Employee => !!e);
-  return assignStations([...present, ...[...employees.values()].filter(e => e.ownerSupport && !present.some(p => p.id === e.id))]);
+  return assignStations([...present, ...[...employees.values()].filter(e => e.ownerSupport && !present.some(p => p.id === e.id))],
+    employees.has("lt-ngoc-long") ? busyKitchenTarget(shifts[0]?.date, minute) : 1);
 }
 
 /** Shared role resolution for reports and the scheduler's cached slot masks. */
-export function assignStations(present: Employee[]): Employee[] {
+export function assignStations(present: Employee[], kitchenNeeded = 1): Employee[] {
   const flexible = present.filter(e => e.station === "BOTH").sort((a, b) => a.id.localeCompare(b.id));
-  const cook = present.some(e => e.station === "KITCHEN") ? undefined : flexible[0]?.id;
-  return present.map(e => e.station === "BOTH" ? { ...e, station: e.id === cook ? "KITCHEN" : "SERVICE" } : e);
+  const pureKitchen = present.filter(e => e.station === "KITCHEN").length;
+  const hasService = present.some(e => e.station !== "KITCHEN" && e.station !== "BOTH");
+  const needed = Math.max(1 - pureKitchen, Math.min(kitchenNeeded - pureKitchen, flexible.length - (hasService ? 0 : 1)), 0);
+  const cooks = new Set(flexible.slice(0, needed).map(e => e.id));
+  return present.map(e => e.station === "BOTH" ? { ...e, station: cooks.has(e.id) ? "KITCHEN" : "SERVICE" } : e);
 }
 
 export function coveragePoints(shifts: Shift[], from: number, to: number): number[] {

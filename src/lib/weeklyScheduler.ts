@@ -1,3 +1,4 @@
+import { busyKitchenTarget } from "./coveragePolicy";
 import type { DemandBand } from "./staffing";
 import type { Employee, PreferredWindow, Shift } from "../types";
 import { DAY_WEIGHTS, datesOfMonth, parseIsoDate, weekdayKeyOf, type WeekdayKey } from "./demand";
@@ -320,15 +321,18 @@ function calculateDayCost(shifts: Shift[], blocks: DayBlocks, weekday: WeekdayKe
     for (let i = 0; i < counts.length; i++) counts[i]++;
   }
   const members = [...byEmployee.values()];
-  const assigned = model.minutes.map((_, i) => {
+  const busyKitchen = ctx.rules.some(r => r.label === "Bếp ngày đông") && busyKitchenTarget(date, 720) === 2;
+  const assigned = model.minutes.map((minute, i) => {
+    const kitchenNeeded = busyKitchen && ((minute >= 720 && minute < 840) || (minute >= 1080 && minute < 1200)) ? 2 : 1;
     // At most 30 employees fit the bitmask; larger teams keep the general path.
-    if (ctx.employeesById.size > 30) return assignStations(members.filter(m => m.mask[i]).map(m => m.employee));
+    if (ctx.employeesById.size > 30) return assignStations(members.filter(m => m.mask[i]).map(m => m.employee), kitchenNeeded);
     let bits = 0;
     for (const member of members) if (member.mask[i]) bits |= ctx.employeeBits.get(member.employee.id)!;
-    let staff = ctx.stationSubsets.get(bits);
+    const key = bits * 3 + kitchenNeeded;
+    let staff = ctx.stationSubsets.get(key);
     if (!staff) {
-      staff = assignStations([...ctx.employeesById.values()].filter(e => bits & ctx.employeeBits.get(e.id)!));
-      ctx.stationSubsets.set(bits, staff);
+      staff = assignStations([...ctx.employeesById.values()].filter(e => bits & ctx.employeeBits.get(e.id)!), kitchenNeeded);
+      ctx.stationSubsets.set(key, staff);
     }
     return staff;
   });

@@ -44,9 +44,14 @@ const rules: readonly StaffingRule[] = [
     scaled: false, who: (e: Employee) => e.station === "KITCHEN", windows: coreWindows },
   { priority: "required", label: "Bồi bắt buộc", when: "11:00–14:00, 17:00–20:00", minStaff: 1, maxStaff: Infinity,
     scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: coreWindows },
+  { priority: "preparation", label: "Bếp ngày đông", when: "T6–CN 12:00–14:00, 18:00–20:00", minStaff: 2, maxStaff: Infinity,
+    scaled: false, weekdays: ["friday", "saturday", "sunday"], who: (e: Employee) => e.station === "KITCHEN",
+    windows: blocks => [...clip(720, 840)(blocks), ...clip(1080, 1200)(blocks)] },
   { priority: "coverage", label: "Bếp bổ sung", when: "14:00–17:00, 20:00–21:30", minStaff: 1, maxStaff: Infinity,
     scaled: false, who: (e: Employee) => e.station === "KITCHEN",
     windows: blocks => [...clip(840, 1020)(blocks), ...clip(1200, 1290)(blocks)] },
+  { priority: "coverage", label: "Bồi chuẩn bị gọn", when: "11:00–12:00", minStaff: 1, maxStaff: 1,
+    scaled: false, who: (e: Employee) => e.station !== "KITCHEN", windows: clip(660, 720) },
   { priority: "coverage", label: "Bồi bổ sung", when: "14:00–17:00, 20:00–21:30", minStaff: 1, maxStaff: Infinity,
     scaled: false, who: (e: Employee) => e.station !== "KITCHEN",
     windows: blocks => [...clip(840, 1020)(blocks), ...clip(1200, 1290)(blocks)] },
@@ -56,14 +61,15 @@ export const STORES: StoreConfig[] = [
     address: "", sampleEmployees: lemontasteEmployees,
     workHours: lemontasteHours, staffingRules: rules,
     demandProfile: [
-      { startMinutes: 660, endMinutes: 840, level: 1.8, label: "Cao điểm trưa và chuẩn bị" },
+      { startMinutes: 660, endMinutes: 720, level: 1, label: "Chuẩn bị trưa" },
+      { startMinutes: 720, endMinutes: 840, level: 1.8, label: "Cao điểm trưa" },
       { startMinutes: 840, endMinutes: 900, level: 1, label: "Sau trưa" },
       { startMinutes: 900, endMinutes: 1020, level: 0.6, label: "Ít khách" },
       { startMinutes: 1020, endMinutes: 1200, level: 1.8, label: "Cao điểm tối và chuẩn bị" },
       { startMinutes: 1200, endMinutes: 1290, level: 0.8, label: "Cuối ca" },
     ],
-    dayWeights: { monday: 1, tuesday: 1, wednesday: 1, thursday: 1, friday: 1, saturday: 1.5, sunday: 1.5 },
-    notes: "Mở 11:00–21:30. Bắt buộc có Bồi và Bếp liên tục 11:00–14:00, 17:00–20:00. Khung 14:00–17:00 và sau 20:00 cho phép thiếu; còn giờ thì phủ thêm. Đông thứ 7, CN. Pause 30 phút. Vollzeit 6 giờ/ngày. Không tính Nacht-/Sonntagszuschlag." },
+    dayWeights: { monday: 1, tuesday: 1, wednesday: 1, thursday: 1, friday: 1.5, saturday: 1.5, sunday: 1.5 },
+    notes: "Mở 11:00–21:30. Bắt buộc có Bồi và Bếp liên tục 11:00–14:00, 17:00–20:00. Khung 14:00–17:00 và sau 20:00 cho phép thiếu; còn giờ thì phủ thêm. Đông T6, T7, CN; ưu tiên 2 Bếp 12–14h, 18–20h. Bồi 11–12h chỉ cần 1 người. Pause 30 phút. Vollzeit 6 giờ/ngày. Không tính Nacht-/Sonntagszuschlag." },
 ];
 
 export const DEFAULT_STORE_ID = STORES[0].id;
